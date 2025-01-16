@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.json",            // 继承根目录的 tsconfig
+  "compilerOptions": {
+    "outDir": "./dist",                        // 输出到 dist 目录
+    "rootDir": "./src",                        // 设定源代码根目录
+    "module": "ESNext",                        // 使用 ES 模块
+    "target": "ES2020"                         // 编译到 ES2020
+  },
+  "include": ["src/**/*.ts"],                   // 包括 renderer 包的所有源代码
+  "exclude": ["node_modules", "dist"]           // 排除 node_modules 和 dist
+}

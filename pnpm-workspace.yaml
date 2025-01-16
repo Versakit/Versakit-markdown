@@ -1,4 +1,2 @@
 packages:
-  - "packages/docs"
-  - "packages/ver-markdown"
-  - "packages/vue-editor"
+  - "packages/*"
