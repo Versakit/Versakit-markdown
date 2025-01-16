@@ -11,7 +11,7 @@
     "paths": {
       "@parser/*": ["packages/parser/src/*"], // 自定义路径映射
       "@renderer/*": ["packages/renderer/src/*"], // 自定义路径映射
-      "@vue-example/*": ["packages/vue-example/src/*"]
+      "@vue/*": ["packages/vue/src/*"] // 自定义路径映射
     },
     "types": ["node", "jest"], // 引入 Node 和 Jest 类型
     "outDir": "./dist", // 输出目录

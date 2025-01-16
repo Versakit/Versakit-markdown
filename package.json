@@ -7,6 +7,9 @@
     "packages/*"
   ],
   "scripts": {
+    "docs:build": "pnpm --filter docs docs:build",
+    "docs:dev": "pnpm --filter docs docs:dev",
+    "docs:preview": "pnpm --filter docs docs:preview",
     "lint": "eslint --ext .js,.vue src",
     "format": "prettier --write .",
     "commitlint": "commitlint --edit",
@@ -31,9 +34,11 @@
     "@commitlint/cli": "^17.7.1",
     "@commitlint/config-conventional": "^17.7.0",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@typescript-eslint/parser": "^8.20.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
+    "eslint-plugin-vue": "^9.32.0",
     "husky": "^9.1.7",
     "lint-staged": "^15.4.0",
     "prettier": "^3.4.2",
