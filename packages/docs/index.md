@@ -3,12 +3,12 @@
 layout: home
 
 hero:
-  name: 'My Awesome Project'
-  text: 'A VitePress Site'
-  tagline: My great project tagline
+  name: 'Versakit Markdown'
+  text: '现代Markdown编辑器'
+  tagline: Versakit Markdown
   actions:
     - theme: brand
-      text: Markdown Examples
+      text: 开始
       link: /examples
     - theme: alt
       text: API Examples
