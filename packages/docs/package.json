@@ -13,5 +13,8 @@
   "license": "ISC",
   "devDependencies": {
     "vitepress": "^1.5.0"
+  },
+  "dependencies": {
+    "@versakit/markdown-vue": "workspace:*"
   }
 }
