@@ -2,7 +2,6 @@
   "name": "versakit-markdown-monorepo",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "scripts": {
     "lint": "eslint packages",
     "lint:fix": "eslint packages --fix",
@@ -27,6 +26,8 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.0",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
