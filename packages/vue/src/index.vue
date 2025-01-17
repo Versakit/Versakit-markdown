@@ -1,8 +1,25 @@
+<template>
+  <div class="rich-text-editor">
+    <ToolBar />
+    <div
+      class="editor"
+      contenteditable="true"
+      @mouseup="saveSelection"
+      @keyup="saveSelection"
+      ref="editorRef"
+    />
+    <div class="status-bar">
+      <div class="position-info">
+        行: {{ currentRow }}, 列: {{ currentColumn }}
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
 import ToolBar from './components/toolbar/index.vue'
 import eventBus from '../utils/eventBus'
-import { createWrapper } from '../utils/core'
 
 defineOptions({ name: 'VerRichEditor' })
 
@@ -12,7 +29,6 @@ const currentRow = ref(1)
 const currentColumn = ref(1)
 
 /**
- * @author Jannik
  * @description 存储当前光标位置
  */
 const restoreSelection = () => {
@@ -25,20 +41,34 @@ const restoreSelection = () => {
   }
 }
 
-const wrapSelection = (wrapper: HTMLElement) => {
+/**
+ * @description 封装光标位置并应用 Markdown 语法
+ * @param cmd - Markdown 语法符号，如 '**' 表示加粗，'*' 表示斜体，'~~' 表示删除线
+ */
+const wrapSelection = (cmd: string) => {
   if (!savedSelection) return
 
-  const content = savedSelection.extractContents()
-  wrapper.appendChild(content)
-  savedSelection.insertNode(wrapper)
-
-  const newRange = document.createRange()
-  newRange.selectNode(wrapper)
   const selection = window.getSelection()
-  if (selection) {
-    selection.removeAllRanges()
-    selection.addRange(newRange)
-    savedSelection = newRange
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0)
+    // 提取选中的文本
+    const selectedText = range.extractContents()
+    // 创建一个文档片段
+    const fragment = document.createDocumentFragment()
+    // 创建一个新的开始文本节点，内容为 cmd
+    const startNode = document.createTextNode(cmd)
+    // 创建一个新的结束文本节点，内容为 cmd
+    const endNode = document.createTextNode(cmd)
+    // 将开始文本节点添加到文档片段中
+    fragment.appendChild(startNode)
+    // 将选中的文本添加到文档片段中
+    fragment.appendChild(selectedText)
+    // 将结束文本节点添加到文档片段中
+    fragment.appendChild(endNode)
+    // 将文档片段插入到选区中
+    range.insertNode(fragment)
+    // 更新 savedSelection 为新的范围
+    savedSelection = range.cloneRange()
   }
 }
 
@@ -52,21 +82,33 @@ const saveSelection = () => {
   }
 }
 
-const boldHandler = (cmd: string) => {
+const boldHandler = () => {
   restoreSelection()
-
-  switch (cmd) {
-    case 'bold':
-      wrapSelection(createWrapper('strong'))
-      break
-  }
-
+  wrapSelection('**')
   if (editorRef.value) {
     editorRef.value.focus()
   }
 }
 
-eventBus.$on('bold', () => boldHandler('bold'))
+const italicHandler = () => {
+  restoreSelection()
+  wrapSelection('*')
+  if (editorRef.value) {
+    editorRef.value.focus()
+  }
+}
+
+const strikethroughHandler = () => {
+  restoreSelection()
+  wrapSelection('~~')
+  if (editorRef.value) {
+    editorRef.value.focus()
+  }
+}
+
+eventBus.$on('bold', () => boldHandler())
+eventBus.$on('italic', () => italicHandler())
+eventBus.$on('strikethrough', () => strikethroughHandler())
 
 /**
  * @description 更新光标位置
@@ -97,6 +139,8 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   eventBus.$off('bold', boldHandler)
+  eventBus.$off('italic', italicHandler)
+  eventBus.$off('strikethrough', strikethroughHandler)
 })
 
 onUnmounted(() => {
@@ -104,26 +148,6 @@ onUnmounted(() => {
   editorRef.value?.removeEventListener('input', updateCursorPosition)
 })
 </script>
-
-<template>
-  <div class="rich-text-editor">
-    <ToolBar />
-
-    <div
-      class="editor"
-      contenteditable="true"
-      @mouseup="saveSelection"
-      @keyup="saveSelection"
-      ref="editorRef"
-    />
-
-    <div class="status-bar">
-      <div class="position-info">
-        行: {{ currentRow }}, 列: {{ currentColumn }}
-      </div>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .rich-text-editor {
