@@ -2,9 +2,9 @@
   <div class="rich-text-editor">
     <div class="toolbar">
       <div class="toolbar-group">
-        <button @click="applyStyle('h1')" title="Heading 1">H1</button>
-        <button @click="applyStyle('h2')" title="Heading 2">H2</button>
-        <button @click="applyStyle('h3')" title="Heading 3">H3</button>
+        <H1 @click="applyStyle('h1')" />
+        <H2 @click="applyStyle('h2')" />
+        <H3 @click="applyStyle('h3')" />
       </div>
 
       <div class="toolbar-group">
@@ -18,33 +18,25 @@
       </div>
 
       <div class="toolbar-group">
-        <button @click="applyStyle('ul')" title="Unordered List">UL</button>
+        <UnOrderList @click="applyStyle('ul')" />
 
         <OrderList @click="applyStyle('ol')" />
 
-        <button @click="applyStyle('blockquote')" title="Quote">Quote</button>
-        <button @click="applyStyle('code')" title="Code">Code</button>
+        <Quote @click="applyStyle('blockquote')" />
+
+        <Code @click="applyStyle('code')" />
       </div>
 
       <div class="toolbar-group">
-        <button @click="insertNode('link')" title="Link">Link</button>
-        <button @click="insertNode('image')" title="Image">Image</button>
-        <button @click="insertNode('table')" title="Table">Table</button>
-        <button @click="insertNode('video')" title="Video">Video</button>
-        <button @click="insertNode('audio')" title="Audio">Audio</button>
-      </div>
+        <Link @click="insertNode('link')" />
 
-      <div class="toolbar-group">
-        <select @change="applyFontSize($event.target.value)">
-          <option value="16px">Normal</option>
-          <option value="20px">Large</option>
-          <option value="24px">Huge</option>
-        </select>
-        <input
-          type="color"
-          @change="applyColor($event.target.value)"
-          title="Text Color"
-        />
+        <Image @click="insertNode('image')" />
+
+        <Table @click="insertNode('table')" />
+
+        <Video @click="insertNode('video')" />
+
+        <Audio @click="insertNode('audio')" />
       </div>
     </div>
 
@@ -81,11 +73,22 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import {
+  H1,
+  H2,
+  H3,
   Bold,
   Italic,
   Underline,
   StrikeThrough,
   OrderList,
+  UnOrderList,
+  Quote,
+  Code,
+  Link,
+  Image,
+  Table,
+  Video,
+  Audio,
 } from '../libs/index.ts'
 
 defineOptions({ name: 'VerRichEditor' })
@@ -310,25 +313,6 @@ const confirmInsertLink = () => {
   }
 }
 
-// Font styling
-const applyFontSize = (size: string) => {
-  restoreSelection()
-  wrapSelection(createWrapper('span', { fontSize: size }))
-
-  if (editorRef.value) {
-    editorRef.value.focus()
-  }
-}
-
-const applyColor = (color: string) => {
-  restoreSelection()
-  wrapSelection(createWrapper('span', { color }))
-
-  if (editorRef.value) {
-    editorRef.value.focus()
-  }
-}
-
 // Paste handling
 const handlePaste = (e: ClipboardEvent) => {
   e.preventDefault()
@@ -399,7 +383,7 @@ onUnmounted(() => {
 }
 
 .editor:focus {
-  background: #fafafa;
+  @apply bg-gray-50;
 }
 
 .status-bar {
