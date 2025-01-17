@@ -1,21 +1,3 @@
-<template>
-  <div class="rich-text-editor">
-    <ToolBar />
-    <div
-      class="editor"
-      contenteditable="true"
-      @mouseup="saveSelection"
-      @keyup="saveSelection"
-      ref="editorRef"
-    />
-    <div class="status-bar">
-      <div class="position-info">
-        行: {{ currentRow }}, 列: {{ currentColumn }}
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
 import ToolBar from './components/toolbar/index.vue'
@@ -82,6 +64,7 @@ const saveSelection = () => {
   }
 }
 
+// 业务层
 const boldHandler = () => {
   restoreSelection()
   wrapSelection('**')
@@ -149,28 +132,32 @@ onUnmounted(() => {
 })
 </script>
 
+<template>
+  <div class="rich-text-editor">
+    <ToolBar />
+    <div
+      class="editor"
+      contenteditable="true"
+      @mouseup="saveSelection"
+      @keyup="saveSelection"
+      ref="editorRef"
+    />
+    <div class="status-bar">
+      <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .rich-text-editor {
-  @apply relative rounded-sm border-2 w-full;
+  @apply relative rounded-sm border-2 w-full dark:bg-zinc-800 dark:text-white dark:border-gray-600;
 }
 
 .editor {
   @apply outline-none p-4 min-h-[400px];
 }
 
-.editor:focus {
-  @apply bg-gray-50;
-}
-
 .status-bar {
-  border-top: 1px solid #ccc;
-  padding: 4px 8px;
-  background: #f5f5f5;
-  font-size: 12px;
-  color: #666;
-}
-
-.position-info {
-  font-family: monospace;
+  @apply text-[12px] text-gray-500 p-2 border-2 dark:text-white border-t-gray-200 dark:bg-zinc-800 dark:border-gray-600;
 }
 </style>

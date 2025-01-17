@@ -63,11 +63,11 @@ import {
 
 <style scoped lang="css">
 .toolbar {
-  @apply bg-white p-2 border-b-2 border-gray-200 flex flex-wrap gap-2;
+  @apply p-2 border-b-2 border-gray-200 flex flex-wrap gap-2 dark:bg-zinc-800 dark:border-gray-600;
 }
 
 .toolbar-group {
-  @apply flex gap-2 px-1 border-r-2 border-r-gray-200 justify-center items-center;
+  @apply flex gap-2 px-1 border-r-2 border-r-gray-200 justify-center items-center dark:border-gray-600;
 }
 
 .toolbar-group:last-child {
