@@ -9,6 +9,7 @@
     "build-type": "run-p type-check \"build-only {@}\" --"
   },
   "dependencies": {
+    "vite-plugin-svg-icons": "^2.0.1",
     "vue": "^3.5.13"
   },
   "devDependencies": {

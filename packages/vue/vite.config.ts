@@ -1,9 +1,16 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import path from 'node:path'
+import { createSvgIconsPlugin } from 'vite-plugin-svg-icons'
 
-// https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()], // 打包配置
+  plugins: [
+    vue(),
+    createSvgIconsPlugin({
+      iconDirs: [path.resolve(process.cwd(), './icons')],
+      symbolId: 'icon-[dir]-[name]',
+    }),
+  ], // 打包配置
   build: {
     sourcemap: true,
     rollupOptions: {

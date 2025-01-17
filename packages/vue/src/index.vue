@@ -8,17 +8,20 @@
       </div>
 
       <div class="toolbar-group">
-        <button @click="applyStyle('bold')" title="Bold">B</button>
-        <button @click="applyStyle('italic')" title="Italic">I</button>
-        <button @click="applyStyle('underline')" title="Underline">U</button>
-        <button @click="applyStyle('strikethrough')" title="Strikethrough">
-          S
-        </button>
+        <Bold @click="applyStyle('bold')" />
+
+        <Italic @click="applyStyle('italic')" />
+
+        <Underline @click="applyStyle('underline')" />
+
+        <StrikeThrough @click="applyStyle('strikethrough')" />
       </div>
 
       <div class="toolbar-group">
         <button @click="applyStyle('ul')" title="Unordered List">UL</button>
-        <button @click="applyStyle('ol')" title="Ordered List">OL</button>
+
+        <OrderList @click="applyStyle('ol')" />
+
         <button @click="applyStyle('blockquote')" title="Quote">Quote</button>
         <button @click="applyStyle('code')" title="Code">Code</button>
       </div>
@@ -53,7 +56,7 @@
       @keyup="saveSelection"
       @input="updateContent"
       @paste="handlePaste"
-    ></div>
+    />
 
     <div class="status-bar">
       <div class="position-info">
@@ -77,6 +80,13 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import {
+  Bold,
+  Italic,
+  Underline,
+  StrikeThrough,
+  OrderList,
+} from '../libs/index.ts'
 
 defineOptions({ name: 'VerRichEditor' })
 
@@ -360,36 +370,20 @@ onUnmounted(() => {
 }
 
 .toolbar {
+  @apply bg-white;
   padding: 8px;
   border-bottom: 1px solid #ccc;
-  background: #f5f5f5;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 2px;
 }
 
 .toolbar-group {
-  display: flex;
-  gap: 4px;
-  padding: 0 4px;
-  border-right: 1px solid #ddd;
+  @apply flex gap-2 px-1 border-r-2 border-r-gray-200 justify-center items-center;
 }
 
 .toolbar-group:last-child {
   border-right: none;
-}
-
-.toolbar button {
-  padding: 4px 8px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
-
-.toolbar button:hover {
-  background: #eee;
 }
 
 .toolbar select {
