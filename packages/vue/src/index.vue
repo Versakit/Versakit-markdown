@@ -21,6 +21,8 @@ const eventMap = new Map([
   ['bold', '**'],
   ['italic', '*'],
   ['strikethrough', '~~'],
+  ['code', '`'],
+  ['h3', '###'],
 ])
 
 /**
