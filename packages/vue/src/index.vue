@@ -1,16 +1,31 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, onUnmounted, ref } from 'vue'
+import {
+  onBeforeUnmount,
+  onMounted,
+  onUnmounted,
+  ref,
+  useTemplateRef,
+} from 'vue'
 import ToolBar from './components/toolbar/index.vue'
 import eventBus from '../utils/eventBus'
+import { applyMarkdownSyntax } from '../utils/core'
 
 defineOptions({ name: 'VerRichEditor' })
 
-const editorRef = ref<HTMLElement | null>(null)
+const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
 let savedSelection: Range | null = null
 const currentRow = ref(1)
 const currentColumn = ref(1)
 
+const eventMap = new Map([
+  ['bold', '**'],
+  ['italic', '*'],
+  ['strikethrough', '~~'],
+])
+
 /**
+ * @author Jannik
+ * @time 2025/1/17
  * @description 存储当前光标位置
  */
 const restoreSelection = () => {
@@ -24,8 +39,10 @@ const restoreSelection = () => {
 }
 
 /**
+ * @author Jannik
+ * @time 2025/1/17
  * @description 封装光标位置并应用 Markdown 语法
- * @param cmd - Markdown 语法符号，如 '**' 表示加粗，'*' 表示斜体，'~~' 表示删除线
+ * @param {String} cmd
  */
 const wrapSelection = (cmd: string) => {
   if (!savedSelection) return
@@ -35,27 +52,19 @@ const wrapSelection = (cmd: string) => {
     const range = selection.getRangeAt(0)
     // 提取选中的文本
     const selectedText = range.extractContents()
-    // 创建一个文档片段
-    const fragment = document.createDocumentFragment()
-    // 创建一个新的开始文本节点，内容为 cmd
-    const startNode = document.createTextNode(cmd)
-    // 创建一个新的结束文本节点，内容为 cmd
-    const endNode = document.createTextNode(cmd)
-    // 将开始文本节点添加到文档片段中
-    fragment.appendChild(startNode)
-    // 将选中的文本添加到文档片段中
-    fragment.appendChild(selectedText)
-    // 将结束文本节点添加到文档片段中
-    fragment.appendChild(endNode)
-    // 将文档片段插入到选区中
-    range.insertNode(fragment)
+    // 调用新的方法应用 Markdown 语法
+    const wrappedText = applyMarkdownSyntax(cmd, selectedText)
+    // 将处理后的文档片段插入到选区中
+    range.insertNode(wrappedText)
     // 更新 savedSelection 为新的范围
     savedSelection = range.cloneRange()
   }
 }
 
 /**
- * 保存当前选中的文本
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 保存选区
  */
 const saveSelection = () => {
   const selection = window.getSelection()
@@ -64,36 +73,27 @@ const saveSelection = () => {
   }
 }
 
-// 业务层
-const boldHandler = () => {
+/**
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 恢复选区
+ * @param {Stirng} cmd
+ */
+const markdownHandler = (cmd: string) => {
   restoreSelection()
-  wrapSelection('**')
+  wrapSelection(cmd)
   if (editorRef.value) {
     editorRef.value.focus()
   }
 }
 
-const italicHandler = () => {
-  restoreSelection()
-  wrapSelection('*')
-  if (editorRef.value) {
-    editorRef.value.focus()
-  }
-}
-
-const strikethroughHandler = () => {
-  restoreSelection()
-  wrapSelection('~~')
-  if (editorRef.value) {
-    editorRef.value.focus()
-  }
-}
-
-eventBus.$on('bold', () => boldHandler())
-eventBus.$on('italic', () => italicHandler())
-eventBus.$on('strikethrough', () => strikethroughHandler())
+eventMap.forEach((cmd, eventName) => {
+  eventBus.$on(eventName, () => markdownHandler(cmd))
+})
 
 /**
+ * @author Jannik
+ * @time 2025/1/17
  * @description 更新光标位置
  */
 const updateCursorPosition = () => {
@@ -103,10 +103,8 @@ const updateCursorPosition = () => {
   let node = selection.focusNode
   let offset = selection.focusOffset
 
-  // Calculate column
   currentColumn.value = offset + 1
 
-  // Calculate row
   let range = document.createRange()
   range.setStart(editorRef.value, 0)
   range.setEnd(node, 0)
@@ -115,15 +113,20 @@ const updateCursorPosition = () => {
   currentRow.value = rows.length
 }
 
+/**
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 生命周期
+ */
 onMounted(() => {
   document.addEventListener('selectionchange', updateCursorPosition)
   editorRef.value?.addEventListener('input', updateCursorPosition)
 })
 
 onBeforeUnmount(() => {
-  eventBus.$off('bold', boldHandler)
-  eventBus.$off('italic', italicHandler)
-  eventBus.$off('strikethrough', strikethroughHandler)
+  eventMap.forEach((cmd, eventName) => {
+    eventBus.$off(eventName, () => markdownHandler(cmd))
+  })
 })
 
 onUnmounted(() => {
