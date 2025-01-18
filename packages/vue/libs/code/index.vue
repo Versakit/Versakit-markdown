@@ -9,7 +9,7 @@ const handCode = () => {
 </script>
 
 <template>
-  <VerTooltip content="代码块">
+  <VerTooltip position="bottom" content="代码块">
     <ver-code @click="handCode">
       <VerIcon name="code" />
     </ver-code>

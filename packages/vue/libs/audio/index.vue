@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="插入音频">
+  <VerTooltip position="bottom" content="插入音频">
     <ver-code>
       <ver-icon name="audio"></ver-icon>
     </ver-code>

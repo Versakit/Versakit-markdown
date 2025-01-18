@@ -10,7 +10,7 @@ const handH3 = () => {
 </script>
 
 <template>
-  <VerTooltip content="三级标题">
+  <VerTooltip position="bottom" content="三级标题">
     <ver-code @click="handH3">
       <VerIcon name="h3" />
     </ver-code>

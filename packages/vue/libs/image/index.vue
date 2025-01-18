@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="插入图片">
+  <VerTooltip position="bottom" content="插入图片">
     <ver-code>
       <VerIcon name="image" />
     </ver-code>

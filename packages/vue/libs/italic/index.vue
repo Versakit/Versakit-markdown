@@ -10,7 +10,7 @@ const handItalic = () => {
 </script>
 
 <template>
-  <VerTooltip content="文字倾斜">
+  <VerTooltip position="bottom" content="文字倾斜">
     <ver-code @click="handItalic">
       <VerIcon name="italic" />
     </ver-code>

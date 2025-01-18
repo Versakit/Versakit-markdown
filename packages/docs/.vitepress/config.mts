@@ -22,4 +22,9 @@ export default defineConfig({
       { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
     ],
   },
+  vite: {
+    server: {
+      port: 8080,
+    },
+  },
 })

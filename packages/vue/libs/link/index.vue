@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="插入链接">
+  <VerTooltip position="bottom" content="插入链接">
     <ver-code>
       <VerIcon name="link" />
     </ver-code>

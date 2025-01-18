@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="二级标题">
+  <VerTooltip position="bottom" content="二级标题">
     <ver-code>
       <VerIcon name="h2" />
     </ver-code>

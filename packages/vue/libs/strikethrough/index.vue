@@ -11,7 +11,7 @@ const handStrikeThrough = () => {
 </script>
 
 <template>
-  <VerTooltip content="文字删除线">
+  <VerTooltip position="bottom" content="文字删除线">
     <ver-code @click="handStrikeThrough">
       <VerIcon name="strikethrough" />
     </ver-code>

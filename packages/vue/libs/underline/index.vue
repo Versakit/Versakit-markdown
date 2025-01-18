@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="文字下划线">
+  <VerTooltip position="bottom" content="文字下划线">
     <ver-code>
       <VerIcon name="underline" />
     </ver-code>

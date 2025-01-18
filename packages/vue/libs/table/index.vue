@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="插入表格">
+  <VerTooltip position="bottom" content="插入表格">
     <ver-code>
       <VerIcon name="table" />
     </ver-code>

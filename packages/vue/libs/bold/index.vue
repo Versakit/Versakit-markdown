@@ -10,7 +10,7 @@ const handBold = () => {
 </script>
 
 <template>
-  <VerTooltip content="文字加粗">
+  <VerTooltip position="bottom" content="文字加粗">
     <ver-code @click="handBold">
       <ver-icon name="bold"></ver-icon>
     </ver-code>

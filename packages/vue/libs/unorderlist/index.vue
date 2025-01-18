@@ -5,7 +5,7 @@ import VerTooltip from '../../components/tooltip/index.ts'
 </script>
 
 <template>
-  <VerTooltip content="无序列表">
+  <VerTooltip position="bottom" content="无序列表">
     <ver-code>
       <VerIcon name="unorderlist" />
     </ver-code>
