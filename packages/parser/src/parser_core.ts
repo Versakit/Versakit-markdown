@@ -8,7 +8,6 @@ export class Parser {
       type: 'document',
       children: [],
     }
-
     let currentParagraph: string[] = []
     let inCodeBlock = false
     let codeBlockContent: string[] = []
