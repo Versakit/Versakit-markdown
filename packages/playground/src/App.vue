@@ -3,18 +3,18 @@ import { VerRichEditor } from '@versakit/markdown-vue'
 import MarkdownParser from '@versakit/markdown-parser'
 import { ref } from 'vue'
 
-const value = ''
+const value = ref('')
 const ast = ref()
 const markdownParser = new MarkdownParser.Parser()
 
-ast.value = markdownParser.parseMarkdown(value)
+ast.value = markdownParser.parseMarkdown(value.value)
 </script>
 
 <template>
   <div class="container">
     <VerRichEditor v-model:value="value" />
-    <span>输入的内容:{{ value }}</span>
-    <span>AST转译的内容:{{ ast }}</span>
+    <div>输入的内容:{{ value }}</div>
+    <div>AST转译的内容:{{ ast }}</div>
   </div>
 </template>
 
