@@ -1,4 +1,4 @@
-const parser = require('../dist/index.cjs.js')
+import parser from '@versakit/markdown-parser'
 
 // 创建解析器实例 - 使用默认导出中的 Parser 类
 const markdownParser = new parser.Parser()
