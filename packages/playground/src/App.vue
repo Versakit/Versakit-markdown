@@ -13,7 +13,8 @@ ast.value = markdownParser.parseMarkdown(value)
 <template>
   <div class="container">
     <VerRichEditor v-model:value="value" />
-    {{ ast }}
+    <span>输入的内容:{{ value }}</span>
+    <span>AST转译的内容:{{ ast }}</span>
   </div>
 </template>
 
