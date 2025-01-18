@@ -18,9 +18,17 @@ const currentRow = ref(1)
 const currentColumn = ref(1)
 
 const eventMap = new Map([
+  ['h1', '#'],
+  ['h2', '##'],
+  ['h3', '###'],
   ['bold', '**'],
   ['italic', '*'],
+  ['underline', '<u>'],
   ['strikethrough', '~~'],
+  ['unorderlist', '-'],
+  ['orderlist', '1.'],
+  ['quote', '>'],
+  ['code', '`'],
 ])
 
 /**
