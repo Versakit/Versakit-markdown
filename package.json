@@ -6,6 +6,7 @@
     "play:dev": "pnpm --filter playground run dev",
     "vue:build": "pnpm --filter @versakit/markdown-vue run build",
     "parser:build": "pnpm --filter @versakit/markdown-parser run build",
+    "renderer:build": "pnpm --filter @versakit/markdown-renderer run build",
     "docs:dev": "pnpm --filter docs run docs:dev",
     "lint": "eslint packages",
     "lint:fix": "eslint packages --fix",
