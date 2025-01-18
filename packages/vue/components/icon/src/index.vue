@@ -31,4 +31,8 @@ const IconName = computed(() => {
   </svg>
 </template>
 
-<style lang="css" scoped src="../style/index.css"></style>
+<style lang="css" scoped>
+.ver-icon {
+  @apply relative text-inherit inline-flex justify-center items-center fill-current overflow-hidden align-bottom dark:text-white;
+}
+</style>
