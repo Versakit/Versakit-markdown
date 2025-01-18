@@ -36,7 +36,6 @@ const emit = defineEmits<{
 const handleInput = () => {
   if (editorRef.value) {
     const newValue = editorRef.value.innerHTML
-    // 触发 update:value 事件，将新值传递回 VerRichEditor
     emit('update:value', newValue)
   }
 }
@@ -103,6 +102,8 @@ const markdownHandler = (cmd: string) => {
   if (editorRef.value) {
     editorRef.value.focus()
   }
+  // 确保先处理 Markdown 语法，再调用 handleInput 方法
+  handleInput()
 }
 
 eventMap.forEach((cmd, eventName) => {
