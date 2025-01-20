@@ -1,15 +1,23 @@
 /**
  * ParserStateCore 是一个用于解析 markdown 文本的状态机对象。
  */
-import type { InlineToken } from '../types'
+import Token from '../token'
 
-export class ParserStateCore {
+class StateCore {
   src: string
-  tokens: InlineToken[]
+  env: any
+  tokens: Token[]
   inlineMode: boolean
-  constructor(src: string) {
+  md: any
+  Token: typeof Token
+  constructor(src: string, md: any, env: any) {
     this.src = src
+    this.env = env
     this.tokens = []
     this.inlineMode = false
+    this.md = md
+    this.Token = Token
   }
 }
+
+export default StateCore

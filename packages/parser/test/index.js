@@ -1,47 +1,23 @@
-import parser from '@versakit/markdown-parser'
-
-// 创建解析器实例 - 使用默认导出中的 Parser 类
-const markdownParser = new parser.Parser()
+import Parser from '@versakit/markdown-parser'
 
 // 测试用例
-const markdown = `# Markdown Parser Test
+const markdownText = `
+# This is a header
 
-这是一个**粗体**和*斜体*的测试。
+This is a paragraph with **bold text** and *italic text*.
 
-## 链接和图片测试
-这是一个[链接](https://example.com)
-![图片](https://example.com/image.jpg)
+- List item 1
+- List item 2
+- List item 3
 
-> 这是一段引用文本
+[Link to Google](https://www.google.com)
+`
 
-### 列表测试
-- 无序列表项 1
-- 无序列表项 2
+// 创建 Parser 实例
+const parser = new Parser()
 
-1. 有序列表项 1
-2. 有序列表项 2
+// 解析 Markdown 文本
+const ast = parser.parseMarkdown(markdownText)
 
-### 代码块测试
-\`\`\`javascript
-console.log('Hello World');
-const test = 123;
-\`\`\`
-
-这是一段包含\`行内代码\`的文本。
-
----
-
-## 测试完成`
-
-// 解析 markdown
-const ast = markdownParser.parseMarkdown(markdown)
-
-// 格式化输出
-console.log('解析结果：')
-console.log(JSON.stringify(ast, null, 2))
-
-// 测试特定节点
-console.log('\n验证解析结果：')
-console.log('文档类型:', ast.type)
-console.log('子节点数量:', ast.children?.length)
-console.log('第一个标题:', ast.children?.[0])
+// 打印解析结果
+console.log(ast)

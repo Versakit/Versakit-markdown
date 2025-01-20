@@ -6,9 +6,12 @@
  * 识别空字符并将其删除。
  */
 
-const NEWLINE_RE = /\r\n?|\n/g
+const NEWLINES_RE = /\r\n?|\n/g
 const NULL_RE = /\0/g
 
-export default function normalize(text: string): string {
-  return text.replace(NEWLINE_RE, '\n').replace(NULL_RE, '')
+export default function normalize(state: { src: string }): void {
+  let str: string
+  str = state.src.replace(NEWLINES_RE, '\n')
+  str = str.replace(NULL_RE, '\uFFFD')
+  state.src = str
 }
