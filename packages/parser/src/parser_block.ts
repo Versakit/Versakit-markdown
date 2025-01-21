@@ -14,10 +14,17 @@ export class ParserBlock {
     this.ruler.push('paragraph', paragraph) // 段落规则放最后
   }
 
+  /**
+   *
+   * @param src
+   * @param md
+   * @param env
+   * @param outTokens
+   */
   parse(src: string, md: any, env: any, outTokens: Token[]): void {
     const rules = this.ruler.getRules('')
     let line = 0
-    let len = src.length
+    const len = src.length
 
     while (line < len) {
       // 获取当前行

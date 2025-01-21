@@ -7,7 +7,6 @@ import Token from './src/token'
 /**
  * Parser 是一个用于解析 Markdown 文本的类型库。
  * 它将原始的 Markdown 文本解析为一个抽象语法树（AST）。
- *
  * @class Parser
  * @example
  * const parser = new Parser()
@@ -29,6 +28,7 @@ class Parser {
   parseMarkdown(text: string): ASTNode[] {
     // 修改方法名从 parserMarkdown 到 parseMarkdown
     const env = {}
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const tokens: Token[] = []
 
     // 初始化state

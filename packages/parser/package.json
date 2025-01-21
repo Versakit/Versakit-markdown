@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "types": "./dist/types/index.d.ts",
   "main": "./dist/index.esm.js",
   "scripts": {
     "build": "rollup -c"
