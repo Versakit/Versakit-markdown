@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ToolBar from './components/toolbar/index.vue'
 import {
+  nextTick,
+  onBeforeMount,
   onBeforeUnmount,
   onMounted,
   onUnmounted,
@@ -13,6 +15,8 @@ import { EventBus } from '../utils/eventBus.ts'
 defineOptions({ name: 'VerRichEditor' })
 
 const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+let savedSelection: Range | null = null
 const currentRow = ref(1)
 const currentColumn = ref(1)
 const eventbus = new EventBus()
@@ -20,8 +24,6 @@ const eventbus = new EventBus()
 withDefaults(defineProps<RichEditorProps>(), {
   value: '',
 })
-
-eventbus.$emit('edit', editorRef.value)
 
 const emit = defineEmits<{
   (event: 'update:value', value: string): void
@@ -31,6 +33,18 @@ const handleInput = () => {
   if (editorRef.value) {
     const newValue = editorRef.value.innerHTML
     emit('update:value', newValue)
+  }
+}
+
+/**
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 保存选区
+ */
+const saveSelection = () => {
+  const selection = window.getSelection()
+  if (selection && selection.rangeCount > 0) {
+    savedSelection = selection.getRangeAt(0).cloneRange()
   }
 }
 
@@ -61,6 +75,13 @@ const updateCursorPosition = () => {
  * @time 2025/1/17
  * @description 生命周期
  */
+
+onBeforeMount(() => {
+  nextTick(() => {
+    eventbus.$emit('edit', editorRef.value)
+  })
+})
+
 onMounted(() => {
   document.addEventListener('selectionchange', updateCursorPosition)
   editorRef.value?.addEventListener('input', updateCursorPosition)
@@ -79,6 +100,7 @@ onUnmounted(() => {
     <ToolBar />
 
     <div
+      id="edit"
       class="editor"
       ref="editorRef"
       contenteditable="true"
