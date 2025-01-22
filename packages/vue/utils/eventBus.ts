@@ -1,4 +1,4 @@
-class EventBus {
+export class EventBus {
   private events: { [key: string]: Array<(...args: any[]) => void> } = {}
 
   $on(event: string, callback: (...args: any[]) => void): void {
@@ -20,5 +20,3 @@ class EventBus {
     }
   }
 }
-
-export default new EventBus()

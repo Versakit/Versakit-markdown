@@ -37,12 +37,14 @@ watch(value, () => {
 
 <style scoped>
 .container-box {
-  width: 100%;
+  padding: 1rem;
   display: flex;
-  justify-content: space-between;
+  width: 100vw;
+  justify-content: center;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
+  overflow: hidden;
 }
 
 .container {
@@ -51,7 +53,7 @@ watch(value, () => {
 
 .preview {
   width: 50%;
-  height: 1000px;
+  height: 600px;
   border: 1px solid #c4c4c4;
 }
 </style>

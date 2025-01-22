@@ -7,27 +7,21 @@ import {
   ref,
   useTemplateRef,
 } from 'vue'
-import { applyMarkdownSyntax } from '../utils/core'
-import eventBus from '../utils/eventBus'
 import type { RichEditorProps } from './type/index.ts'
+import { EventBus } from '../utils/eventBus.ts'
 
 defineOptions({ name: 'VerRichEditor' })
 
 const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
-let savedSelection: Range | null = null
 const currentRow = ref(1)
 const currentColumn = ref(1)
-const eventMap = new Map([
-  ['bold', '**'],
-  ['italic', '*'],
-  ['strikethrough', '~~'],
-  ['code', '`'],
-  ['h3', '###'],
-])
+const eventbus = new EventBus()
 
 withDefaults(defineProps<RichEditorProps>(), {
   value: '',
 })
+
+eventbus.$emit('edit', editorRef.value)
 
 const emit = defineEmits<{
   (event: 'update:value', value: string): void
@@ -39,76 +33,6 @@ const handleInput = () => {
     emit('update:value', newValue)
   }
 }
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 存储当前光标位置
- */
-const restoreSelection = () => {
-  if (savedSelection && editorRef.value) {
-    const selection = window.getSelection()
-    if (selection) {
-      selection.removeAllRanges()
-      selection.addRange(savedSelection)
-    }
-  }
-}
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 封装光标位置并应用 Markdown 语法
- * @param {String} cmd
- */
-const wrapSelection = (cmd: string) => {
-  if (!savedSelection) return
-
-  const selection = window.getSelection()
-  if (selection && selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0)
-    // 提取选中的文本
-    const selectedText = range.extractContents()
-    // 调用新的方法应用 Markdown 语法
-    const wrappedText = applyMarkdownSyntax(cmd, selectedText)
-    // 将处理后的文档片段插入到选区中
-    range.insertNode(wrappedText)
-    // 更新 savedSelection 为新的范围
-    savedSelection = range.cloneRange()
-  }
-}
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 保存选区
- */
-const saveSelection = () => {
-  const selection = window.getSelection()
-  if (selection && selection.rangeCount > 0) {
-    savedSelection = selection.getRangeAt(0).cloneRange()
-  }
-}
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 恢复选区
- * @param {Stirng} cmd
- */
-const markdownHandler = (cmd: string) => {
-  restoreSelection()
-  wrapSelection(cmd)
-  if (editorRef.value) {
-    editorRef.value.focus()
-  }
-  // 确保先处理 Markdown 语法，再调用 handleInput 方法
-  handleInput()
-}
-
-eventMap.forEach((cmd, eventName) => {
-  eventBus.$on(eventName, () => markdownHandler(cmd))
-})
 
 /**
  * @author Jannik
@@ -142,11 +66,7 @@ onMounted(() => {
   editorRef.value?.addEventListener('input', updateCursorPosition)
 })
 
-onBeforeUnmount(() => {
-  eventMap.forEach((cmd, eventName) => {
-    eventBus.$off(eventName, () => markdownHandler(cmd))
-  })
-})
+onBeforeUnmount(() => {})
 
 onUnmounted(() => {
   document.removeEventListener('selectionchange', updateCursorPosition)

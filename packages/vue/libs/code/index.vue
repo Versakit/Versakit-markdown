@@ -2,15 +2,11 @@
 import VerCode from '../../components/code/index.ts'
 import VerIcon from '../../components/icon/index.ts'
 import VerTooltip from '../../components/tooltip/index.ts'
-import eventBus from '../../utils/eventBus.ts'
-const handCode = () => {
-  eventBus.$emit('code')
-}
 </script>
 
 <template>
   <VerTooltip position="bottom" content="代码块">
-    <ver-code @click="handCode">
+    <ver-code>
       <VerIcon name="code" />
     </ver-code>
   </VerTooltip>
