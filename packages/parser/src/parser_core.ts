@@ -1,39 +1,49 @@
-/**
- * ParserCore 是一个将markdown文本进行解析前的预处理类
- *
- */
-import Ruler from './ruler'
-import StateCore from './rules_core/state_core'
+import { rules } from './ruler'
+import { InlineToken } from './types'
 
-import r_normalize from './rules_core/normalize'
-import r_block from './rules_core/block'
-import r_inline from './rules_core/inline'
+export class ParserInline {
+  parseInline(text: string): InlineToken[] {
+    const tokens: InlineToken[] = []
+    let currentText = text
 
-const _rules: [string, Function][] = [
-  ['normalize', r_normalize],
-  ['block', r_block],
-  ['inline', r_inline],
-]
+    // 处理图片
+    currentText = currentText.replace(rules.markdown.image, (_, alt, src) => {
+      tokens.push({ type: 'image', alt, src })
+      return ''
+    })
 
-class Core {
-  ruler: Ruler
+    // 处理链接
+    currentText = currentText.replace(rules.markdown.link, (_, text, url) => {
+      tokens.push({ type: 'link', text, url })
+      return ''
+    })
 
-  constructor() {
-    this.ruler = new Ruler()
-    for (let i = 0; i < _rules.length; i++) {
-      this.ruler.push(_rules[i][0], _rules[i][1])
+    // 处理粗体
+    currentText = currentText.replace(rules.markdown.bold, (_, content) => {
+      tokens.push({ type: 'bold', content })
+      return ''
+    })
+
+    // 处理斜体
+    currentText = currentText.replace(rules.markdown.italic, (_, content) => {
+      tokens.push({ type: 'italic', content })
+      return ''
+    })
+
+    // 处理行内代码
+    currentText = currentText.replace(
+      rules.markdown.inlineCode,
+      (_, content) => {
+        tokens.push({ type: 'inlineCode', content })
+        return ''
+      },
+    )
+
+    // 处理剩余的普通文本
+    if (currentText.trim()) {
+      tokens.push({ type: 'text', content: currentText.trim() })
     }
+
+    return tokens
   }
-
-  process(state: any): void {
-    const rules = this.ruler.getRules('')
-
-    for (let i = 0, l = rules.length; i < l; i++) {
-      rules[i](state)
-    }
-  }
-
-  State = StateCore
 }
-
-export default Core

@@ -1,23 +1,49 @@
-import Ruler from './ruler'
-import Token from './token'
-import { bold, italic } from './rules_inline'
+import { rules } from './ruler'
+import { InlineToken } from './types'
 
 export class ParserInline {
-  ruler: Ruler
+  parseInline(text: string): InlineToken[] {
+    const tokens: InlineToken[] = []
+    let currentText = text
 
-  constructor() {
-    this.ruler = new Ruler()
+    // 处理图片
+    currentText = currentText.replace(rules.markdown.image, (_, alt, src) => {
+      tokens.push({ type: 'image', alt, src })
+      return ''
+    })
 
-    // 注册内联规则
-    this.ruler.push('bold', bold)
-    this.ruler.push('italic', italic)
-  }
+    // 处理链接
+    currentText = currentText.replace(rules.markdown.link, (_, text, url) => {
+      tokens.push({ type: 'link', text, url })
+      return ''
+    })
 
-  parse(str: string, md: any, env: any, outTokens: Token[]): void {
-    const rules = this.ruler.getRules('')
+    // 处理粗体
+    currentText = currentText.replace(rules.markdown.bold, (_, content) => {
+      tokens.push({ type: 'bold', content })
+      return ''
+    })
 
-    for (let i = 0; i < rules.length; i++) {
-      rules[i](str, outTokens, md, env)
+    // 处理斜体
+    currentText = currentText.replace(rules.markdown.italic, (_, content) => {
+      tokens.push({ type: 'italic', content })
+      return ''
+    })
+
+    // 处理行内代码
+    currentText = currentText.replace(
+      rules.markdown.inlineCode,
+      (_, content) => {
+        tokens.push({ type: 'inlineCode', content })
+        return ''
+      },
+    )
+
+    // 处理剩余的普通文本
+    if (currentText.trim()) {
+      tokens.push({ type: 'text', content: currentText.trim() })
     }
+
+    return tokens
   }
 }

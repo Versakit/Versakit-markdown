@@ -1,46 +1,111 @@
-import Ruler from './ruler'
-import Token from './token'
-import { heading, paragraph, blockquote } from './rules_block'
+import { rules } from './ruler'
+import { ASTNode } from './types'
+import { ParserInline } from './parser_inline'
 
 export class ParserBlock {
-  ruler: Ruler
+  private inlineParser: ParserInline
 
   constructor() {
-    this.ruler = new Ruler()
-
-    // 注册块级规则
-    this.ruler.push('heading', heading)
-    this.ruler.push('blockquote', blockquote)
-    this.ruler.push('paragraph', paragraph) // 段落规则放最后
+    this.inlineParser = new ParserInline()
   }
 
-  /**
-   *
-   * @param src
-   * @param md
-   * @param env
-   * @param outTokens
-   */
-  parse(src: string, md: any, env: any, outTokens: Token[]): void {
-    const rules = this.ruler.getRules('')
-    let line = 0
-    const len = src.length
+  parseBlocks(lines: string[]): ASTNode[] {
+    const blocks: ASTNode[] = []
+    let currentParagraph: string[] = []
+    let inCodeBlock = false
+    let codeBlockContent: string[] = []
+    let codeBlockLang = ''
 
-    while (line < len) {
-      // 获取当前行
-      let pos = src.indexOf('\n', line)
-      if (pos === -1) pos = len
+    const processParagraph = () => {
+      if (currentParagraph.length > 0) {
+        blocks.push({
+          type: 'paragraph',
+          content: this.inlineParser.parseInline(
+            currentParagraph.join(' ').trim(),
+          ),
+        })
+        currentParagraph = []
+      }
+    }
 
-      const lineText = src.slice(line, pos)
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim()
 
-      // 应用所有规则
-      for (let i = 0; i < rules.length; i++) {
-        if (rules[i](lineText, outTokens, md, env)) {
-          break
+      // 处理代码块
+      if (rules.markdown.codeBlock.test(line) && !inCodeBlock) {
+        const [, lang] = line.match(rules.markdown.codeBlock) || []
+        inCodeBlock = true
+        codeBlockLang = lang
+        continue
+      }
+      if (inCodeBlock) {
+        if (line === '```') {
+          blocks.push({
+            type: 'codeBlock',
+            content: codeBlockContent.join('\n'),
+            lang: codeBlockLang,
+          })
+          inCodeBlock = false
+          codeBlockContent = []
+          continue
         }
+        codeBlockContent.push(line)
+        continue
       }
 
-      line = pos + 1
+      // 处理标题
+      if (rules.markdown.heading.test(line)) {
+        processParagraph()
+        const [, level, content] = line.match(rules.markdown.heading) || []
+        blocks.push({
+          type: 'heading',
+          depth: level.length,
+          content: this.inlineParser.parseInline(content),
+        })
+        continue
+      }
+
+      // 处理引用
+      if (rules.markdown.blockquote.test(line)) {
+        processParagraph()
+        const [, content] = line.match(rules.markdown.blockquote) || []
+        blocks.push({
+          type: 'blockquote',
+          content: this.inlineParser.parseInline(content),
+        })
+        continue
+      }
+
+      // 处理列表
+      if (rules.markdown.list.test(line)) {
+        processParagraph()
+        const [, marker, content] = line.match(rules.markdown.list) || []
+        blocks.push({
+          type: 'listItem',
+          ordered: /^\d+\./.test(marker),
+          content: this.inlineParser.parseInline(content),
+        })
+        continue
+      }
+
+      // 处理分割线
+      if (rules.markdown.hr.test(line)) {
+        processParagraph()
+        blocks.push({ type: 'hr' })
+        continue
+      }
+
+      // 处理段落
+      if (line === '') {
+        processParagraph()
+      } else {
+        currentParagraph.push(line)
+      }
     }
+
+    // 处理最后的段落
+    processParagraph()
+
+    return blocks
   }
 }

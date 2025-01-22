@@ -1,8 +1,32 @@
+export interface Rules {
+  markdown: {
+    heading: RegExp
+    bold: RegExp
+    italic: RegExp
+    link: RegExp
+    image: RegExp
+    blockquote: RegExp
+    list: RegExp
+    codeBlock: RegExp
+    inlineCode: RegExp
+    hr: RegExp
+  }
+}
+
 export interface ASTNode {
   type: string
-  tag?: string
-  content?: string
   children?: ASTNode[]
-  attrs?: { [key: string]: string }
-  marks?: string[]
+  depth?: number
+  content?: string | InlineToken[]
+  lang?: string
+  ordered?: boolean
+}
+
+export interface InlineToken {
+  type: string
+  content?: string
+  text?: string
+  url?: string
+  alt?: string
+  src?: string
 }
