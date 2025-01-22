@@ -1,4 +1,4 @@
-import Parser from '@versakit/markdown-parser'
+import MarkdownParser from '@versakit/markdown-parser'
 
 // 测试用例
 const markdownText = `
@@ -14,10 +14,10 @@ This is a paragraph with **bold text** and *italic text*.
 `
 
 // 创建 Parser 实例
-const parser = new Parser()
+const parser = new MarkdownParser.Parser()
 
 // 解析 Markdown 文本
 const ast = parser.parseMarkdown(markdownText)
 
 // 打印解析结果
-console.log(ast)
+console.log(JSON.stringify(ast))
