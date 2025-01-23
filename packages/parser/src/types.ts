@@ -3,6 +3,7 @@ export interface Rules {
     heading: RegExp
     bold: RegExp
     italic: RegExp
+
     strikethrough: RegExp
     underline: RegExp
     subscript: RegExp
