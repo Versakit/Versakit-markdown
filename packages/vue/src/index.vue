@@ -2,102 +2,34 @@
 import {
   onBeforeUnmount,
   onMounted,
+  onUpdated,
   onUnmounted,
   ref,
   useTemplateRef,
 } from 'vue'
 import ToolBar from './components/toolbar/index.vue'
-import eventBus from '../utils/eventBus'
-import { applyMarkdownSyntax } from '../utils/core'
+import { Observer } from '../utils/observer.ts'
+import sharedObservable from '../utils/sharedObservable.ts' // 引入单例实例
 
 defineOptions({ name: 'VerRichEditor' })
 
+// 先定义更新函数
+const customUpdateFunction = (data: any) => {
+  console.log('Received data:', data)
+}
+
+// 再实例化观察者
+const observer = new Observer(customUpdateFunction)
+
+// 使用单例的 Observable 实例
+const observable = sharedObservable
+
+// 将观察者注册到 Observable
+observable.attach(observer)
+
 const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
-let savedSelection: Range | null = null
 const currentRow = ref(1)
 const currentColumn = ref(1)
-
-const eventMap = new Map([
-  ['h1', '#'],
-  ['h2', '##'],
-  ['h3', '###'],
-  ['bold', '**'],
-  ['italic', '*'],
-  ['underline', '<u>'],
-  ['strikethrough', '~~'],
-  ['unorderlist', '-'],
-  ['orderlist', '1.'],
-  ['quote', '>'],
-  ['code', '`'],
-])
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 存储当前光标位置
- */
-const restoreSelection = () => {
-  if (savedSelection && editorRef.value) {
-    const selection = window.getSelection()
-    if (selection) {
-      selection.removeAllRanges()
-      selection.addRange(savedSelection)
-    }
-  }
-}
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 封装光标位置并应用 Markdown 语法
- * @param {String} cmd
- */
-const wrapSelection = (cmd: string) => {
-  if (!savedSelection) return
-
-  const selection = window.getSelection()
-  if (selection && selection.rangeCount > 0) {
-    const range = selection.getRangeAt(0)
-    // 提取选中的文本
-    const selectedText = range.extractContents()
-    // 调用新的方法应用 Markdown 语法
-    const wrappedText = applyMarkdownSyntax(cmd, selectedText)
-    // 将处理后的文档片段插入到选区中
-    range.insertNode(wrappedText)
-    // 更新 savedSelection 为新的范围
-    savedSelection = range.cloneRange()
-  }
-}
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 保存选区
- */
-const saveSelection = () => {
-  const selection = window.getSelection()
-  if (selection && selection.rangeCount > 0) {
-    savedSelection = selection.getRangeAt(0).cloneRange()
-  }
-}
-
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 恢复选区
- * @param {Stirng} cmd
- */
-const markdownHandler = (cmd: string) => {
-  restoreSelection()
-  wrapSelection(cmd)
-  if (editorRef.value) {
-    editorRef.value.focus()
-  }
-}
-
-eventMap.forEach((cmd, eventName) => {
-  eventBus.$on(eventName, () => markdownHandler(cmd))
-})
 
 /**
  * @author Jannik
@@ -131,11 +63,14 @@ onMounted(() => {
   editorRef.value?.addEventListener('input', updateCursorPosition)
 })
 
-onBeforeUnmount(() => {
-  eventMap.forEach((cmd, eventName) => {
-    eventBus.$off(eventName, () => markdownHandler(cmd))
-  })
+onUpdated(() => {
+  if (editorRef.value) {
+    // 通过 actions 方法将 editorRef 传递给 Observable
+    observable.actions({ editorRef: editorRef.value })
+  }
 })
+
+onBeforeUnmount(() => {})
 
 onUnmounted(() => {
   document.removeEventListener('selectionchange', updateCursorPosition)
