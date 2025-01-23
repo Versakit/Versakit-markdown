@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { VerRichEditor } from '@versakit/markdown-vue'
-import MarkdownParser from '@versakit/markdown-parser'
-import MarKdownRenderer from '@versakit/markdown-renderer'
+import { VerRichEditor } from '@versakit/markdown-vue' // Markdown 编辑器的 Vue 组件
+import MarkdownParser from '@versakit/markdown-parser' // Markdown 解析器
+import MarKdownRenderer from '@versakit/markdown-renderer' // Markdown 渲染器
 import { ref, watch } from 'vue'
 
 const value = ref('')
@@ -14,7 +14,7 @@ const markdownRenderer = new MarKdownRenderer.Renderer()
 const updateAST = () => {
   ast.value = parser.parseMarkdown(value.value)
 
-  console.log(ast.value)
+  console.log(ast.value, '--------ast.value')
 }
 
 // 监听value的变化,更新AST
@@ -22,7 +22,7 @@ watch(value, () => {
   updateAST()
   preview.value = markdownRenderer.render(ast.value)
 
-  console.log(preview.value)
+  console.log(preview.value, '---------preview')
 })
 </script>
 
@@ -30,6 +30,9 @@ watch(value, () => {
   <div class="container-box">
     <div class="container">
       <VerRichEditor v-model:value="value" />
+    </div>
+    <div style="border: 1px solid red; width: 50%; height: 600px">
+      {{ value }}
     </div>
 
     <div class="preview">
