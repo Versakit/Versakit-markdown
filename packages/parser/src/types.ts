@@ -3,6 +3,15 @@ export interface Rules {
     heading: RegExp
     bold: RegExp
     italic: RegExp
+    strikethrough: RegExp
+    underline: RegExp
+    subscript: RegExp
+    superscript: RegExp
+    audio: RegExp
+    checkboxUnchecked: RegExp
+    checkboxChecked: RegExp
+    highlight: RegExp
+
     link: RegExp
     image: RegExp
     blockquote: RegExp
