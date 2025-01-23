@@ -1,0 +1,25 @@
+{
+  "name": "@versakit/markdown-vue",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "./dist/markdown-vue.js",
+  "scripts": {
+    "build": "vite build",
+    "build-type": "run-p type-check \"build-only {@}\" --"
+  },
+  "dependencies": {
+    "vite-plugin-svg-icons": "^2.0.1",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "@vue/tsconfig": "^0.7.0",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "~5.6.2",
+    "vite": "^6.0.5",
+    "vue-tsc": "^2.2.0"
+  }
+}

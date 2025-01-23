@@ -1,38 +1,71 @@
 <script setup lang="ts">
-import ToolBar from './components/toolbar/index.vue'
 import {
-  nextTick,
-  onBeforeMount,
   onBeforeUnmount,
   onMounted,
   onUnmounted,
   ref,
   useTemplateRef,
 } from 'vue'
-import type { RichEditorProps } from './type/index.ts'
-import { EventBus } from '../utils/eventBus.ts'
+import ToolBar from './components/toolbar/index.vue'
+import eventBus from '../utils/eventBus'
+import { applyMarkdownSyntax } from '../utils/core'
 
 defineOptions({ name: 'VerRichEditor' })
 
 const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 let savedSelection: Range | null = null
 const currentRow = ref(1)
 const currentColumn = ref(1)
-const eventbus = new EventBus()
 
-withDefaults(defineProps<RichEditorProps>(), {
-  value: '',
-})
+const eventMap = new Map([
+  ['h1', '#'],
+  ['h2', '##'],
+  ['h3', '###'],
+  ['bold', '**'],
+  ['italic', '*'],
+  ['underline', '<u>'],
+  ['strikethrough', '~~'],
+  ['unorderlist', '-'],
+  ['orderlist', '1.'],
+  ['quote', '>'],
+  ['code', '`'],
+])
 
-const emit = defineEmits<{
-  (event: 'update:value', value: string): void
-}>()
+/**
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 存储当前光标位置
+ */
+const restoreSelection = () => {
+  if (savedSelection && editorRef.value) {
+    const selection = window.getSelection()
+    if (selection) {
+      selection.removeAllRanges()
+      selection.addRange(savedSelection)
+    }
+  }
+}
 
-const handleInput = () => {
-  if (editorRef.value) {
-    const newValue = editorRef.value.innerHTML
-    emit('update:value', newValue)
+/**
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 封装光标位置并应用 Markdown 语法
+ * @param {String} cmd
+ */
+const wrapSelection = (cmd: string) => {
+  if (!savedSelection) return
+
+  const selection = window.getSelection()
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0)
+    // 提取选中的文本
+    const selectedText = range.extractContents()
+    // 调用新的方法应用 Markdown 语法
+    const wrappedText = applyMarkdownSyntax(cmd, selectedText)
+    // 将处理后的文档片段插入到选区中
+    range.insertNode(wrappedText)
+    // 更新 savedSelection 为新的范围
+    savedSelection = range.cloneRange()
   }
 }
 
@@ -47,6 +80,24 @@ const saveSelection = () => {
     savedSelection = selection.getRangeAt(0).cloneRange()
   }
 }
+
+/**
+ * @author Jannik
+ * @time 2025/1/17
+ * @description 恢复选区
+ * @param {Stirng} cmd
+ */
+const markdownHandler = (cmd: string) => {
+  restoreSelection()
+  wrapSelection(cmd)
+  if (editorRef.value) {
+    editorRef.value.focus()
+  }
+}
+
+eventMap.forEach((cmd, eventName) => {
+  eventBus.$on(eventName, () => markdownHandler(cmd))
+})
 
 /**
  * @author Jannik
@@ -75,19 +126,16 @@ const updateCursorPosition = () => {
  * @time 2025/1/17
  * @description 生命周期
  */
-
-onBeforeMount(() => {
-  nextTick(() => {
-    eventbus.$emit('edit', editorRef.value)
-  })
-})
-
 onMounted(() => {
   document.addEventListener('selectionchange', updateCursorPosition)
   editorRef.value?.addEventListener('input', updateCursorPosition)
 })
 
-onBeforeUnmount(() => {})
+onBeforeUnmount(() => {
+  eventMap.forEach((cmd, eventName) => {
+    eventBus.$off(eventName, () => markdownHandler(cmd))
+  })
+})
 
 onUnmounted(() => {
   document.removeEventListener('selectionchange', updateCursorPosition)
@@ -98,15 +146,12 @@ onUnmounted(() => {
 <template>
   <div class="rich-text-editor">
     <ToolBar />
-
     <div
-      id="edit"
       class="editor"
-      ref="editorRef"
       contenteditable="true"
       @mouseup="saveSelection"
       @keyup="saveSelection"
-      @input="handleInput"
+      ref="editorRef"
     />
     <div class="status-bar">
       <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>

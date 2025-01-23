@@ -12,32 +12,21 @@ export default defineConfig({
     }),
   ], // 打包配置
   build: {
-    sourcemap: false,
+    sourcemap: true,
     rollupOptions: {
       external: ['vue'],
-      output: [
-        {
-          exports: 'named',
-          globals: {
-            vue: 'Vue',
-          },
-          preserveModules: false,
+      output: {
+        exports: 'named',
+        globals: {
+          vue: 'Vue',
         },
-        {
-          format: 'umd',
-          dir: 'dist/umd',
-          entryFileNames: '[name].umd.js',
-          name: 'index',
-        },
-        {
-          format: 'esm',
-          dir: 'dist/esm',
-          entryFileNames: '[name].esm.js',
-        },
-      ],
+        preserveModules: false,
+      },
     },
     lib: {
       entry: 'index.ts',
+      formats: ['es', 'umd'],
+      name: 'index',
     },
     terserOptions: {
       compress: {
