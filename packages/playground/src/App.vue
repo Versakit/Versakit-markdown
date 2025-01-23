@@ -7,18 +7,22 @@ import { ref, watch } from 'vue'
 const value = ref('')
 const ast = ref()
 const preview = ref()
-const markdownParser = new MarkdownParser.Parser()
+const parser = new MarkdownParser.Parser()
 const markdownRenderer = new MarKdownRenderer.Renderer()
 
 // 监听输入的内容变化
 const updateAST = () => {
-  ast.value = markdownParser.parseMarkdown(value.value)
+  ast.value = parser.parseMarkdown(value.value)
+
+  console.log(ast.value)
 }
 
 // 监听value的变化,更新AST
 watch(value, () => {
   updateAST()
   preview.value = markdownRenderer.render(ast.value)
+
+  console.log(preview.value)
 })
 </script>
 
@@ -29,7 +33,8 @@ watch(value, () => {
     </div>
 
     <div class="preview">
-      <h3>预览</h3>
+      <h2>预览</h2>
+
       <span v-html="preview"></span>
     </div>
   </div>
