@@ -12,6 +12,8 @@ export interface Rules {
     checkboxUnchecked: RegExp
     checkboxChecked: RegExp
     highlight: RegExp
+    math: RegExp
+    prompt: RegExp
 
     link: RegExp
     image: RegExp

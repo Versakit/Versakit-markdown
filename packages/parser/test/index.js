@@ -30,7 +30,7 @@ const markdown = `# Markdown Parser Test
 ### 代码块测试
 \`\`\`javascript
 console.log('Hello World');
-const test = 123;
+const test = 123^5^;
 \`\`\`
 
 这是一段包含\`行内代码\`的文本。
@@ -57,9 +57,11 @@ const test = 123;
 ### 复选框测试
 
 - [ ]这是第一个未选复选框
+
 - [ ] 第二个未选复选框用于确认功能
 
 - [x] 第一个已选复选框
+
 - [x] 第二个已选复选框
 
 ### 高亮测试
@@ -71,6 +73,10 @@ const test = 123;
 ### 分割线
 
 ---
+
+### 数学公式
+
+$$ E = mc^2^ $$
 
 ## 测试完成`
 
@@ -86,3 +92,9 @@ console.log('\n验证解析结果：')
 console.log('文档类型:', ast.type)
 console.log('子节点数量:', ast.children?.length)
 console.log('第一个标题:', ast.children?.[0])
+const multiLineFormula = `$$ 
+    E = mc^2^ 
+    E = mc^2^
+$$`
+const isMatch = /^\$\$([\s\S]*?)\$\$$/.test(multiLineFormula)
+console.log(isMatch)

@@ -99,6 +99,17 @@ export class ParserBlock {
         continue
       }
 
+      // 处理块级数学公式
+      if (rules.markdown.math.test(line)) {
+        processParagraph()
+        const [, content] = line.match(rules.markdown.math) || []
+        blocks.push({
+          type: 'math',
+          content: this.inlineParser.parseInline(content),
+        })
+        continue
+      }
+
       // 处理段落
       if (line === '') {
         processParagraph()
