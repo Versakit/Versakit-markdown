@@ -1,6 +1,7 @@
 .tooltip {
   display: inline-block;
   position: relative;
+  user-select: none;
 }
 
 .tooltip-content {
