@@ -38,6 +38,46 @@ export class ParserInline {
         return ''
       },
     )
+    // 处理删除线
+    currentText = currentText.replace(
+      rules.markdown.strikethrough,
+      (_, content) => {
+        tokens.push({ type: 'strikethrough', content })
+        return ''
+      },
+    )
+    // 处理下划线
+    currentText = currentText.replace(
+      rules.markdown.underline,
+      (_, content) => {
+        tokens.push({ type: 'underline', content })
+        return ''
+      },
+    )
+    // 处理高亮
+    currentText = currentText.replace(
+      rules.markdown.highlight,
+      (_, content) => {
+        tokens.push({ type: 'highlight', content })
+        return ''
+      },
+    )
+    // 处理上标
+    currentText = currentText.replace(
+      rules.markdown.superscript,
+      (_, content) => {
+        tokens.push({ type: 'superscript', content })
+        return ''
+      },
+    )
+    // 处理下标
+    currentText = currentText.replace(
+      rules.markdown.subscript,
+      (_, content) => {
+        tokens.push({ type: 'subscript', content })
+        return ''
+      },
+    )
 
     // 处理剩余的普通文本
     if (currentText.trim()) {

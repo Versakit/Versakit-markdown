@@ -10,11 +10,11 @@ export class ParserBlock {
   }
 
   parseBlocks(lines: string[]): ASTNode[] {
-    const blocks: ASTNode[] = []
-    let currentParagraph: string[] = []
-    let inCodeBlock = false
-    let codeBlockContent: string[] = []
-    let codeBlockLang = ''
+    const blocks: ASTNode[] = [] // 存储解析后的 AST 节点
+    let currentParagraph: string[] = [] // 当前段落的内容
+    let inCodeBlock = false // 是否在代码块内
+    let codeBlockContent: string[] = [] // 代码块内容
+    let codeBlockLang = '' // 代码块语言
 
     const processParagraph = () => {
       if (currentParagraph.length > 0) {
@@ -92,6 +92,63 @@ export class ParserBlock {
       if (rules.markdown.hr.test(line)) {
         processParagraph()
         blocks.push({ type: 'hr' })
+        continue
+      }
+
+      // 处理表格
+      if (rules.markdown.table.test(line)) {
+        processParagraph()
+        const tableLines = lines.slice(i).join('\n')
+        const tableMatch = tableLines.match(rules.markdown.table)
+        if (tableMatch) {
+          const [header, rows] = tableMatch.slice(1)
+          const headers = header.split('|').map((h) => h.trim())
+          const tableRows = rows
+            .split('\n')
+            .map((row) => row.split('|').map((cell) => cell.trim()))
+          blocks.push({
+            type: 'table',
+            headers,
+            rows: tableRows,
+          })
+          i += tableLines.split('\n').length - 1
+          continue
+        }
+      }
+
+      // 处理脚注引用
+      if (rules.markdown.footnote.reference.test(line)) {
+        processParagraph()
+        const [, label] = line.match(rules.markdown.footnote.reference) || []
+        blocks.push({
+          type: 'footnoteReference',
+          label,
+        })
+        continue
+      }
+
+      // 处理脚注定义
+      if (rules.markdown.footnote.definition.test(line)) {
+        processParagraph()
+        const [, label, content] =
+          line.match(rules.markdown.footnote.definition) || []
+        blocks.push({
+          type: 'footnoteDefinition',
+          label,
+          content: this.inlineParser.parseInline(content),
+        })
+        continue
+      }
+
+      // 处理任务列表
+      if (rules.markdown.taskList.test(line)) {
+        processParagraph()
+        const [, marker, content] = line.match(rules.markdown.taskList) || []
+        blocks.push({
+          type: 'taskListItem',
+          checked: marker.trim() === '[x]',
+          content: this.inlineParser.parseInline(content),
+        })
         continue
       }
 
