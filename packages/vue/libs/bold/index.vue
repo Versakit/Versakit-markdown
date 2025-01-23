@@ -1,28 +1,30 @@
+<template>
+  <VerTooltip position="top" content="文字加粗">
+    <VerCode @click="handBold">
+      <VerIcon name="bold" />
+    </VerCode>
+  </VerTooltip>
+</template>
+
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
 import VerCode from '../../components/code/index.ts'
 import VerIcon from '../../components/icon/index.ts'
 import VerTooltip from '../../components/tooltip/index.ts'
-import { Observer } from '../../utils/observer.ts'
-import sharedObservable from '../../utils/sharedObservable.ts' // 引入单例实例
+import store from '../../store/store.ts'
 
-// 使用单例的 Observable 实例
-const observable = sharedObservable
 const elRef = ref()
+const editorRef = ref<HTMLElement | null>(null)
 
-// 定义更新函数，不触发 Observable 的状态更新
-const customUpdateFunction = (data: any) => {
-  elRef.value = data.state.editorRef
+// 定义更新函数，处理状态更新时的逻辑
+const customUpdateFunction = (observable: any) => {
+  const state = observable.getState()
+  elRef.value = state.editorRef
+  console.log('Index2.vue received data:', state)
 }
 
-// 创建 Observer 实例
-const observer = new Observer(customUpdateFunction)
-
-// 将观察者附加到可观察对象
-observable.attach(observer)
-
-// 通过 ref 获取编辑器元素
-const editorRef = ref<HTMLElement | null>(null)
+// 注册观察者到 store
+const unsubscribe = store.attach(customUpdateFunction)
 
 // 模拟一个点击事件，触发数据传递
 const handBold = () => {
@@ -40,16 +42,13 @@ const handBold = () => {
   }
 
   if (editorRef.value) {
-    // 将 editorRef 传递给 observable.actions
-    observable.actions({ editorRef: editorRef.value })
+    // 通过 store 更新状态
+    store.actions({ editorRef: editorRef.value })
   }
 }
-</script>
 
-<template>
-  <VerTooltip position="top" content="文字加粗">
-    <VerCode @click="handBold">
-      <VerIcon name="bold" />
-    </VerCode>
-  </VerTooltip>
-</template>
+onBeforeUnmount(() => {
+  // 移除观察者，防止内存泄漏
+  unsubscribe()
+})
+</script>

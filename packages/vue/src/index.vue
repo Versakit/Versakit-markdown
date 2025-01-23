@@ -1,3 +1,13 @@
+<template>
+  <div class="rich-text-editor">
+    <ToolBar />
+    <div class="editor" contenteditable="true" ref="editorRef" />
+    <div class="status-bar">
+      <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
+    </div>
+  </div>
+</template>
+
 <script setup lang="ts">
 import {
   onBeforeUnmount,
@@ -8,34 +18,15 @@ import {
   useTemplateRef,
 } from 'vue'
 import ToolBar from './components/toolbar/index.vue'
-import { Observer } from '../utils/observer.ts'
-import sharedObservable from '../utils/sharedObservable.ts' // 引入单例实例
+import store from '../store/store'
 
 defineOptions({ name: 'VerRichEditor' })
-
-// 先定义更新函数
-const customUpdateFunction = (data: any) => {
-  console.log('Received data:', data)
-}
-
-// 再实例化观察者
-const observer = new Observer(customUpdateFunction)
-
-// 使用单例的 Observable 实例
-const observable = sharedObservable
-
-// 将观察者注册到 Observable
-observable.attach(observer)
 
 const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
 const currentRow = ref(1)
 const currentColumn = ref(1)
 
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 更新光标位置
- */
+// 更新光标位置
 const updateCursorPosition = () => {
   const selection = window.getSelection()
   if (!selection || !selection.focusNode || !editorRef.value) return
@@ -53,11 +44,15 @@ const updateCursorPosition = () => {
   currentRow.value = rows.length
 }
 
-/**
- * @author Jannik
- * @time 2025/1/17
- * @description 生命周期
- */
+// 定义更新函数，处理状态更新时的逻辑
+const customUpdateFunction = (observable: any) => {
+  console.log('Index.vue received data:', observable.getState())
+}
+
+// 注册观察者到 store
+const unsubscribe = store.attach(customUpdateFunction)
+
+// 生命周期钩子
 onMounted(() => {
   document.addEventListener('selectionchange', updateCursorPosition)
   editorRef.value?.addEventListener('input', updateCursorPosition)
@@ -65,34 +60,21 @@ onMounted(() => {
 
 onUpdated(() => {
   if (editorRef.value) {
-    // 通过 actions 方法将 editorRef 传递给 Observable
-    observable.actions({ editorRef: editorRef.value })
+    // 通过 store 更新状态
+    store.actions({ editorRef: editorRef.value })
   }
 })
 
-onBeforeUnmount(() => {})
+onBeforeUnmount(() => {
+  // 移除观察者，防止内存泄漏
+  unsubscribe()
+})
 
 onUnmounted(() => {
   document.removeEventListener('selectionchange', updateCursorPosition)
   editorRef.value?.removeEventListener('input', updateCursorPosition)
 })
 </script>
-
-<template>
-  <div class="rich-text-editor">
-    <ToolBar />
-    <div
-      class="editor"
-      contenteditable="true"
-      @mouseup="saveSelection"
-      @keyup="saveSelection"
-      ref="editorRef"
-    />
-    <div class="status-bar">
-      <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
-    </div>
-  </div>
-</template>
 
 <style scoped>
 .rich-text-editor {
