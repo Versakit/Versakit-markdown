@@ -4,7 +4,7 @@ import { Rules } from './types'
 export const rules: Rules = {
   markdown: {
     heading: /^(#{1,6})\s+(.+)$/,
-    bold: /\*\*(.+?)\*\*|__(.+?)__/,
+    bold: /\*\*(?!\s)(.+?)(?<!\s)\*\*/g,
     italic: /\*(.+?)\*|_(.+?)_/,
     strikethrough: /~~(.+?)~~/,
     superscript: /\^(.+?)\^/,
