@@ -12,13 +12,13 @@ import VerCode from '../../components/code/index.ts'
 import VerIcon from '../../components/icon/index.ts'
 import VerTooltip from '../../components/tooltip/index.ts'
 import store from '../../store/store.ts'
+import eventBus from '../../utils/eventBus.ts'
 
 const elRef = ref<HTMLElement | null>(null)
 
 // 定义更新函数，处理状态更新时的逻辑
 const customUpdateFunction = (observable: any) => {
   const state = observable.getState()
-
   elRef.value = state.editorRef
 }
 
@@ -63,6 +63,8 @@ const handBold = () => {
     // 通过 store 更新状态
     store.actions({ editorRef: elRef.value })
   }
+
+  eventBus.$emit('input')
 }
 
 onBeforeUnmount(() => {
