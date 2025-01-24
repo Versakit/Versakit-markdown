@@ -6,9 +6,6 @@
 import type { App, Component } from 'vue'
 import VerRichEditor from './src/index'
 
-/** 样式文件 */
-import './style/index.css'
-
 /** 图标文件 */
 import 'virtual:svg-icons-register'
 

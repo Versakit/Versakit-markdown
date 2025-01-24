@@ -80,12 +80,27 @@ onUnmounted(() => {
 })
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .editor {
-  @apply outline-none p-4 min-h-[400px];
+  padding: 1rem;
+  outline: none;
+  min-height: 400px;
 }
 
 .status-bar {
-  @apply absolute bottom-0 left-0 w-full text-[12px] text-gray-500 p-2 dark:text-white dark:bg-zinc-800 dark:border-gray-600;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  font-size: 12px;
+  color: #888; // text-gray-500
+  padding: 2px;
+  user-select: none;
+
+  &.dark {
+    color: #fff; // dark:text-white
+    background-color: #222; // dark:bg-zinc-800
+    border-color: #4c5257; // dark:border-gray-600
+  }
 }
 </style>

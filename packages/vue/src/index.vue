@@ -26,8 +26,18 @@ const updateValue = (newValue: string) => {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .rich-text-editor {
-  @apply relative rounded-sm border-2 h-full w-full dark:bg-zinc-800 dark:text-white dark:border-gray-600;
+  position: relative;
+  border-radius: 0.125rem;
+  border: 2px solid #e2e8f0;
+  height: 100%;
+  width: 100%;
+
+  .dark & {
+    background-color: #222;
+    color: #fff;
+    border-color: #4c5257;
+  }
 }
 </style>
