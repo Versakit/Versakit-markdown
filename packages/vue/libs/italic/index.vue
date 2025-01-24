@@ -6,20 +6,22 @@ import VerTooltip from '../../components/tooltip/index.ts'
 import store from '../../store/store.ts'
 
 const elRef = ref<HTMLElement | null>(null)
-const editorRef = ref<HTMLElement | null>(null)
 
 // 定义更新函数，处理状态更新时的逻辑
 const customUpdateFunction = (observable: any) => {
   const state = observable.getState()
   elRef.value = state.editorRef
-  // console.log('Index2.vue received data:', state)
 }
 
 // 注册观察者到 store
 const unsubscribe = store.attach(customUpdateFunction)
 
+onBeforeUnmount(() => {
+  // 移除观察者，防止内存泄漏
+  unsubscribe()
+})
 const handItalic = () => {
-  if (editorRef.value) {
+  if (elRef.value) {
     const selection = window.getSelection()
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0)
@@ -30,11 +32,11 @@ const handItalic = () => {
         ancestor = ancestor.parentNode as HTMLElement
       }
       // 检查祖先节点是否在 elRef 元素内
-      if (editorRef.value.contains(ancestor)) {
+      if (elRef.value.contains(ancestor)) {
         const selectedText = range.toString()
         if (selectedText.startsWith('*') && selectedText.endsWith('*')) {
           // 如果已经倾斜，还原
-          const newText = selectedText.slice(1, -1)
+          const newText = selectedText.slice(2, -2)
           range.deleteContents()
           range.insertNode(document.createTextNode(newText))
         } else {
@@ -51,9 +53,9 @@ const handItalic = () => {
     }
   }
 
-  if (editorRef.value) {
+  if (elRef.value) {
     // 通过 store 更新状态
-    store.actions({ editorRef: editorRef.value })
+    store.actions({ editorRef: elRef.value })
   }
 }
 

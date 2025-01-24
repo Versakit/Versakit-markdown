@@ -15,13 +15,11 @@ import store from '../../store/store.ts'
 import eventBus from '../../utils/eventBus.ts'
 
 const elRef = ref<HTMLElement | null>(null)
-const editorRef = ref<HTMLElement | null>(null) // 编辑器元素
 
 // 定义更新函数，处理状态更新时的逻辑
 const customUpdateFunction = (observable: any) => {
   const state = observable.getState()
   elRef.value = state.editorRef
-  // console.log('Index2.vue received data:', state)
 }
 
 // 注册观察者到 store
@@ -62,9 +60,9 @@ const handBold = () => {
     }
   }
 
-  if (editorRef.value) {
+  if (elRef.value) {
     // 通过 store 更新状态
-    store.actions({ editorRef: editorRef.value })
+    store.actions({ editorRef: elRef.value })
   }
   eventBus.$emit('updateValue')
 }

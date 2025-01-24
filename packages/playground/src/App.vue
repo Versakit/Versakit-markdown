@@ -13,16 +13,12 @@ const markdownRenderer = new MarKdownRenderer.Renderer()
 // 监听输入的内容变化
 const updateAST = () => {
   ast.value = parser.parseMarkdown(value.value)
-
-  console.log(ast.value, '--------ast.value')
 }
 
 // 监听value的变化,更新AST
 watch(value, () => {
   updateAST()
   preview.value = markdownRenderer.render(ast.value)
-
-  console.log(preview.value, '---------preview')
 })
 </script>
 
@@ -37,7 +33,6 @@ watch(value, () => {
 
     <div class="preview">
       <h2>预览</h2>
-
       <span v-html="preview"></span>
     </div>
   </div>
