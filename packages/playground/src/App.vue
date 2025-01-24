@@ -8,7 +8,7 @@ const value = ref('')
 const ast = ref()
 const preview = ref()
 const parser = new MarkdownParser.Parser()
-const markdownRenderer = new MarKdownRenderer.Renderer()
+const markdownRenderer = new MarKdownRenderer()
 
 // 监听输入的内容变化
 const updateAST = () => {
@@ -24,13 +24,22 @@ watch(value, () => {
 
 <template>
   <div class="container-box">
-    <div class="container">
+    <div class="rich">
       <VerRichEditor v-model:value="value" />
     </div>
 
     <div class="preview">
+      <h3>输入的内容</h3>
+      <span>{{ value }}</span>
+
+      <h3>AST</h3>
+      <span>{{ ast }}</span>
+
       <h2>预览</h2>
       <span v-html="preview"></span>
+
+      <h2>渲染器</h2>
+      <span>{{ preview }}</span>
     </div>
   </div>
 </template>
@@ -45,15 +54,18 @@ watch(value, () => {
   flex-direction: row;
   height: 100vh;
   overflow: hidden;
+  gap: 8px;
 }
 
-.container {
+.rich {
   width: 50%;
+  height: 100%;
 }
 
 .preview {
   width: 50%;
-  height: 600px;
+  height: 100%;
   border: 1px solid #c4c4c4;
+  overflow-x: hidden;
 }
 </style>

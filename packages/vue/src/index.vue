@@ -1,14 +1,12 @@
 <template>
-  <div class="rich-text-editor">
-    <ToolBar />
-    <div
-      class="editor"
-      contenteditable="true"
-      ref="editorRef"
-      @input="handinput"
-    />
-    <div class="status-bar">
-      <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
+  <div>
+    <div class="rich-text-editor">
+      <ToolBar />
+      <div class="editor" contenteditable="true" ref="editorRef" />
+
+      <div class="status-bar">
+        <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
+      </div>
     </div>
   </div>
 </template>
@@ -37,8 +35,6 @@ withDefaults(defineProps<RichProps>(), {
 })
 
 const emit = defineEmits(['update:value'])
-
-const handinput = () => {}
 
 // 更新光标位置
 const updateCursorPosition = () => {
@@ -95,7 +91,7 @@ onUnmounted(() => {
 
 <style scoped>
 .rich-text-editor {
-  @apply relative rounded-sm border-2 w-full dark:bg-zinc-800 dark:text-white dark:border-gray-600;
+  @apply relative rounded-sm border-2 h-full w-full dark:bg-zinc-800 dark:text-white dark:border-gray-600;
 }
 
 .editor {
@@ -103,6 +99,6 @@ onUnmounted(() => {
 }
 
 .status-bar {
-  @apply text-[12px] text-gray-500 p-2 border-2 dark:text-white border-t-gray-200 dark:bg-zinc-800 dark:border-gray-600;
+  @apply absolute bottom-0 left-0 w-full text-[12px] text-gray-500 p-2  dark:text-white  dark:bg-zinc-800 dark:border-gray-600;
 }
 </style>
