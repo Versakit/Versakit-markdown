@@ -77,7 +77,11 @@ export class ParserBlock {
       }
 
       // 处理列表
-      if (rules.markdown.list.test(line)) {
+      if (
+        rules.markdown.checkboxUnchecked.exec(line) &&
+        rules.markdown.checkboxChecked.exec(line) &&
+        rules.markdown.list.test(line)
+      ) {
         processParagraph()
         const [, marker, content] = line.match(rules.markdown.list) || []
         blocks.push({
