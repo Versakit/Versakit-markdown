@@ -12,21 +12,14 @@
 </template>
 
 <script setup lang="ts">
-import {
-  onBeforeUnmount,
-  onMounted,
-  onUpdated,
-  onUnmounted,
-  ref,
-  useTemplateRef,
-} from 'vue'
+import { onBeforeUnmount, onMounted, onUpdated, onUnmounted, ref } from 'vue'
 import ToolBar from './components/toolbar/index.vue'
 import store from '../store/store'
 import type { RichProps } from './type.ts'
 
 defineOptions({ name: 'VerRichEditor' })
 
-const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
+const editorRef = ref<HTMLElement | null>(null)
 const currentRow = ref(1)
 const currentColumn = ref(1)
 
@@ -44,14 +37,30 @@ const updateCursorPosition = () => {
   let node = selection.focusNode
   let offset = selection.focusOffset
 
+  // 更新列号
   currentColumn.value = offset + 1
 
-  let range = document.createRange()
-  range.setStart(editorRef.value, 0)
-  range.setEnd(node, 0)
-  let content = range.cloneContents()
-  let rows = content.textContent?.split('\n') || []
-  currentRow.value = rows.length
+  // 从编辑器的根节点开始遍历
+  let currentNode = editorRef.value.firstChild
+  let row = 1 // 初始行号为 1
+
+  // 遍历所有节点，直到到达光标所在的节点
+  while (currentNode && currentNode !== node) {
+    if (currentNode.nodeType === Node.ELEMENT_NODE) {
+      const element = currentNode as HTMLElement
+      if (
+        element.tagName.toLowerCase() === 'p' ||
+        element.tagName.toLowerCase() === 'div' ||
+        element.tagName.toLowerCase() === 'br'
+      ) {
+        row++
+      }
+    }
+    currentNode = currentNode.nextSibling
+  }
+
+  // 更新行号
+  currentRow.value = row
 }
 
 // 定义更新函数，处理状态更新时的逻辑
@@ -73,13 +82,11 @@ onMounted(() => {
 
 onUpdated(() => {
   if (editorRef.value) {
-    // 通过 store 更新状态
     store.actions({ editorRef: editorRef.value })
   }
 })
 
 onBeforeUnmount(() => {
-  // 移除观察者，防止内存泄漏
   unsubscribe()
 })
 
