@@ -4,9 +4,25 @@
   </div>
 </template>
 
-<style scoped lang="css">
+<style scoped lang="scss">
 .ver-code {
-  @apply flex justify-center items-center p-1 text-gray-500 hover:text-black cursor-pointer
-    dark:text-gray-200 dark:hover:text-white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px;
+  color: #888;
+  cursor: pointer;
+
+  &:hover {
+    color: #000;
+  }
+
+  .dark & {
+    color: #a0aec0;
+
+    &:hover {
+      color: #fff;
+    }
+  }
 }
 </style>

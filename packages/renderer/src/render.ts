@@ -1,4 +1,7 @@
-export class Renderer {
+// Renderer.ts
+import { renderDocument } from './inlineRenderer'
+
+class MarkDownRenderer {
   render(ast: any): string {
     return this.renderNode(ast)
   }
@@ -9,59 +12,57 @@ export class Renderer {
         return node.children
           .map((child: any) => this.renderNode(child))
           .join('\n')
+
       case 'heading':
-        return `<h${node.depth}>${this.renderInline(node.content)}</h${node.depth}>`
+        return `<h${node.depth}>${renderDocument(node.content)}</h${node.depth}>`
+
       case 'paragraph':
-        return `<p>${this.renderInline(node.content)}</p>`
+        return `<p>${renderDocument(node.content)}</p>`
+
       case 'blockquote':
-        return `<blockquote>${this.renderInline(node.content)}</blockquote>`
-      case 'list':
-        const tag = node.ordered ? 'ol' : 'ul'
-        return `<${tag}><li>${this.renderInline(node.content)}</li></${tag}>`
-      case 'code':
-        return `<pre><code${node.lang ? ` class="language-${node.lang}"` : ''}>${this.escapeHtml(node.content)}</code></pre>`
+        return `<blockquote>${this.renderNode(node.content)}</blockquote>`
+
+      case 'text':
+        return renderDocument(node.content)
+
+      case 'inlineCode':
+        return `<code>${renderDocument(node.content)}</code>`
+
+      case 'strikethrough':
+        return `<del>${renderDocument(node.content)}</del>`
+
+      case 'underline':
+        return `<u>${renderDocument(node.content)}</u>`
+
+      case 'subscript':
+        return `<sub>${renderDocument(node.content)}</sub>`
+
+      case 'superscript':
+        return `<sup>${renderDocument(node.content)}</sup>`
+
+      case 'checkboxUnchecked':
+        return `<input type="checkbox" disabled> ${renderDocument(node.content)}`
+
+      case 'checkboxChecked':
+        return `<input type="checkbox" checked disabled> ${renderDocument(node.content)}`
+
+      case 'highlight':
+        return `<mark>${renderDocument(node.content)}</mark>`
+
       case 'hr':
-        return '<hr>'
+        return `<hr>`
+
+      case 'image':
+        return `<img src="${node.src}" alt="${node.alt}">`
+
+      case 'link':
+        return `<a href="${node.url}">${node.text}</a>`
+
       default:
+        console.warn(`Unknown node type: ${node.type}`)
         return ''
     }
   }
-
-  renderInline(tokens: any): string {
-    if (typeof tokens === 'string') {
-      return this.escapeHtml(tokens)
-    }
-    return tokens
-      .map((token: any) => {
-        if (typeof token === 'string') {
-          return this.escapeHtml(token)
-        }
-        switch (token.type) {
-          case 'bold':
-            return `<strong>${this.escapeHtml(token.content)}</strong>`
-          case 'italic':
-            return `<em>${this.escapeHtml(token.content)}</em>`
-          case 'link':
-            return `<a href="${this.escapeHtml(token.url)}">${this.escapeHtml(token.text)}</a>`
-          case 'image':
-            return `<img src="${this.escapeHtml(token.src)}" alt="${this.escapeHtml(token.alt)}">`
-          case 'inlineCode':
-            return `<code>${this.escapeHtml(token.content)}</code>`
-          default:
-            return ''
-        }
-      })
-      .join('')
-  }
-
-  escapeHtml(text: string): string {
-    const escapeMap: { [key: string]: string } = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-    }
-    return text.replace(/[&<>"']/g, (char: string) => escapeMap[char])
-  }
 }
+
+export default MarkDownRenderer

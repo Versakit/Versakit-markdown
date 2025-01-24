@@ -31,4 +31,4 @@ const IconName = computed(() => {
   </svg>
 </template>
 
-<style lang="css" scoped src="../style/index.css"></style>
+<style lang="scss" scoped src="../style/index.scss"></style>

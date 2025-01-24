@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeUnmount } from 'vue'
 import VerCode from '../../components/code/index.ts'
 import VerIcon from '../../components/icon/index.ts'
 import VerTooltip from '../../components/tooltip/index.ts'
