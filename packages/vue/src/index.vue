@@ -1,12 +1,7 @@
 <template>
   <div class="rich-text-editor">
     <ToolBar />
-    <div
-      class="editor"
-      contenteditable="true"
-      ref="editorRef"
-      @input="handinput"
-    />
+    <div class="editor" contenteditable="true" ref="editorRef" />
     <div class="status-bar">
       <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
     </div>
@@ -25,28 +20,12 @@ import {
 } from 'vue'
 import ToolBar from './components/toolbar/index.vue'
 import store from '../store/store'
-import type { RichProps } from './type.ts'
 
 defineOptions({ name: 'VerRichEditor' })
 
 const editorRef = useTemplateRef<HTMLElement | null>('editorRef')
 const currentRow = ref(1)
 const currentColumn = ref(1)
-// const emit = defineEmits(['update:value'])
-
-const updateValue = () => {
-  // debugger
-  emit('update:value', editorRef.value?.innerText)
-  console.log('updateValue', editorRef.value?.innerText)
-}
-
-withDefaults(defineProps<RichProps>(), {
-  value: '',
-})
-
-// const emit = defineEmits(['update:value'])
-
-// const handinput = () => {}
 
 // 更新光标位置
 const updateCursorPosition = () => {
@@ -69,11 +48,8 @@ const updateCursorPosition = () => {
 }
 
 // 定义更新函数，处理状态更新时的逻辑
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const customUpdateFunction = (_observable: any) => {
-  const textContent = editorRef.value?.textContent || ''
-
-  emit('update:value', textContent)
+const customUpdateFunction = (observable: any) => {
+  console.log('Index.vue received data:', observable.getState())
 }
 
 // 注册观察者到 store
