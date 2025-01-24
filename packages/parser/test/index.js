@@ -69,9 +69,10 @@ const test = 123;
 
 ## 测试完成`
 
-// 解析 markdown
-const ast = MarkdownParser.parseMarkdown(markdownText)
+const md = new MarkdownParser.Parser()
 
+// 解析 markdown
+const ast = md.parseMarkdown(markdownText)
 // 格式化输出
 console.log('解析结果：')
 console.log(JSON.stringify(ast, null, 2))
