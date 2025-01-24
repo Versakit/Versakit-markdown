@@ -46,7 +46,7 @@ watch(value, () => {
 
 <style scoped>
 .container-box {
-  padding: 1rem;
+  padding: 2rem;
   display: flex;
   width: 100vw;
   justify-content: center;
