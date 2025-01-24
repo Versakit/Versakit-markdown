@@ -12,7 +12,6 @@ import VerCode from '../../components/code/index.ts'
 import VerIcon from '../../components/icon/index.ts'
 import VerTooltip from '../../components/tooltip/index.ts'
 import store from '../../store/store.ts'
-import eventBus from '../../utils/eventBus.ts'
 
 const elRef = ref<HTMLElement | null>(null)
 
@@ -63,8 +62,6 @@ const handBold = () => {
     // 通过 store 更新状态
     store.actions({ editorRef: elRef.value })
   }
-
-  eventBus.$emit('input')
 }
 
 onBeforeUnmount(() => {
