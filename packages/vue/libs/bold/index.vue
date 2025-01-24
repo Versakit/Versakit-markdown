@@ -19,6 +19,7 @@ const elRef = ref<HTMLElement | null>(null)
 // 定义更新函数，处理状态更新时的逻辑
 const customUpdateFunction = (observable: any) => {
   const state = observable.getState()
+
   elRef.value = state.editorRef
 }
 

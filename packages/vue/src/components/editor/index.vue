@@ -1,11 +1,6 @@
 <template>
   <div>
-    <div
-      class="editor"
-      contenteditable="true"
-      ref="editorRef"
-      @input="handInput"
-    />
+    <div class="editor" contenteditable="true" ref="editorRef" />
     <div class="status-bar">
       <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
     </div>
@@ -15,7 +10,6 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue'
 import store from '../../../store/store.ts'
-import eventBus from '../../../utils/eventBus.ts'
 import type { RichProps } from '../../type.ts'
 
 const editorRef = ref<HTMLElement | null>(null)
@@ -58,18 +52,12 @@ const updateCursorPosition = () => {
   currentRow.value = row
 }
 
-const handInput = () => {
+// 定义更新函数，处理状态更新时的逻辑
+const customUpdateFunction = () => {
   const textContent = editorRef.value?.textContent || ''
-
-  console.log(textContent)
 
   // 更新父组件的 value
   emit('update:value', textContent)
-}
-
-// 定义更新函数，处理状态更新时的逻辑
-const customUpdateFunction = () => {
-  eventBus.$on('input', handInput)
 }
 
 // 注册观察者到 store
@@ -77,6 +65,10 @@ const unsubscribe = store.attach(customUpdateFunction)
 
 // 生命周期钩子
 onMounted(() => {
+  if (editorRef.value) {
+    store.actions({ editorRef: editorRef.value })
+  }
+
   document.addEventListener('selectionchange', updateCursorPosition)
   editorRef.value?.addEventListener('input', customUpdateFunction)
 })

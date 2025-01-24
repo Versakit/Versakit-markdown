@@ -15,17 +15,29 @@ export default defineConfig({
     sourcemap: true,
     rollupOptions: {
       external: ['vue'],
-      output: {
-        exports: 'named',
-        globals: {
-          vue: 'Vue',
+      output: [
+        {
+          exports: 'named',
+          globals: {
+            vue: 'Vue',
+          },
+          preserveModules: false,
         },
-        preserveModules: false,
-      },
+        {
+          format: 'umd',
+          dir: 'dist/umd',
+          entryFileNames: '[name].umd.js',
+          name: 'index',
+        },
+        {
+          format: 'esm',
+          dir: 'dist/esm',
+          entryFileNames: '[name].esm.js',
+        },
+      ],
     },
     lib: {
       entry: 'index.ts',
-      formats: ['es', 'umd'],
       name: 'index',
     },
     terserOptions: {
