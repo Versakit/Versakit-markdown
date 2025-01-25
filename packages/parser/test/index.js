@@ -1,7 +1,5 @@
 import MarkdownParser from '@versakit/markdown-parser'
-
-// 测试用例
-const markdownText = `
+/*
 # This is a header
 
 This is a paragraph with **bold text** and *italic text*.
@@ -21,6 +19,9 @@ const ast = parser.parseMarkdown(markdownText)
 
 ### 多行测试
 
+*/
+// 测试用例
+const markdownText = `
 
 ### 代码块测试
 \`\`\`javascript
