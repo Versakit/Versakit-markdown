@@ -13,6 +13,11 @@ export interface Rules {
     checkboxChecked: RegExp
     highlight: RegExp
     math: RegExp
+    table: {
+      header: RegExp
+      separator: RegExp
+      row: RegExp
+    }
 
     link: RegExp
     image: RegExp

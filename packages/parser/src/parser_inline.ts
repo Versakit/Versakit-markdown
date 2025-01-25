@@ -22,6 +22,7 @@ export class ParserInline {
         { rule: rules.markdown.checkboxUnchecked, type: 'checkboxUnchecked' },
         { rule: rules.markdown.checkboxChecked, type: 'checkboxChecked' },
         { rule: rules.markdown.highlight, type: 'highlight' },
+        { rule: rules.markdown.table.header, type: 'table' },
       ]
         .map(({ rule, type }) => {
           const match = remainingText.match(rule)

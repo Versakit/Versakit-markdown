@@ -1,5 +1,5 @@
 import MarkdownParser from '@versakit/markdown-parser'
-/*
+const markdownText1 = `
 # This is a header
 
 This is a paragraph with **bold text** and *italic text*.
@@ -19,17 +19,9 @@ const ast = parser.parseMarkdown(markdownText)
 
 ### 多行测试
 
-*/
-// 测试用例
-const markdownText = `
 
-### 代码块测试
-\`\`\`javascript
-console.log('Hello World');
-const test = 123^5^;
-\`\`\`
 
-这是一段包含\`行内代码\`的文本。
+
 
 ### 删除线测试
 这是一段包含 ~~单个删除线~~ 的文本。
@@ -45,6 +37,18 @@ const test = 123^5^;
 ### 上标测试
  X^2^ 表示 X 的平方。
  E = mc^2^ 是质能方程。
+`
+
+// 测试用例
+const markdownText2 = `
+
+### 代码块测试
+\`\`\`javascript
+console.log('Hello World');
+const test = 123^5^;
+\`\`\`
+
+这是一段包含\`行内代码\`的文本。
 
 ### 音频测试
 这是一个音频链接 !\[音频\](https://example.com/audio1.mp3)。
@@ -74,12 +78,19 @@ const test = 123^5^;
 
 $$ E = mc^2^ $$
 
+### 表格测试
+
+| 左对齐 | 居中对齐 | 右对齐 |
+|:-------|:--------:|-------:|
+| 内容1  | 内容2    | 内容3  |
+| A1     | B1       | C1     |
+
 ## 测试完成`
 
 const md = new MarkdownParser.Parser()
 
 // 解析 markdown
-const ast = md.parseMarkdown(markdownText)
+const ast = md.parseMarkdown(markdownText2)
 // 格式化输出
 console.log('解析结果：')
 console.log(JSON.stringify(ast, null, 2))
@@ -89,6 +100,7 @@ console.log('\n验证解析结果：')
 console.log('文档类型:', ast.type)
 console.log('子节点数量:', ast.children?.length)
 console.log('第一个标题:', ast.children?.[0])
+console.log(markdownText1)
 const multiLineFormula = `$$ 
     E = mc^2^ 
     E = mc^2^

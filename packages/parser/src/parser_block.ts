@@ -2,6 +2,15 @@ import { rules } from './ruler'
 import { ASTNode } from './types'
 import { ParserInline } from './parser_inline'
 
+interface InlineElement {
+  type: 'bold' | 'italic' | 'link' | 'image' | 'inlineCode'
+  content?: string
+  text?: string
+  url?: string
+  alt?: string
+  src?: string
+}
+
 export class ParserBlock {
   private inlineParser: ParserInline
 
@@ -47,6 +56,16 @@ export class ParserBlock {
         })
 
         continue
+      }
+
+      // 添加表格解析
+      if (rules.markdown.table.header.test(line)) {
+        const tableData = this.parseTable(lines, i)
+        if (tableData) {
+          blocks.push(tableData)
+          i += tableData.rows.length + 1 // 跳过已处理的行
+          continue
+        }
       }
 
       // 处理标题
@@ -118,5 +137,131 @@ export class ParserBlock {
     processParagraph()
 
     return blocks
+  }
+
+  // 添加表格解析方法
+  parseTable(lines: string[], startIndex: number) {
+    // 检查参数有效性
+    if (!lines || !lines[startIndex]) return null
+
+    const headerLine = lines[startIndex].trim()
+    const headerMatch = headerLine.match(rules.markdown.table.header)
+    if (!headerMatch || !lines[startIndex + 1]) return null
+
+    const separatorLine = lines[startIndex + 1].trim()
+    const separatorMatch = separatorLine.match(rules.markdown.table.separator)
+    if (!separatorMatch) return null
+
+    // 处理表头
+    const headers = headerLine
+      .slice(1, -1) // 移除首尾的 |
+      .split('|')
+      .map((cell) => cell.trim())
+
+    // 处理对齐信息
+    const alignments = separatorLine
+      .slice(1, -1) // 移除首尾的 |
+      .split('|')
+      .map((cell) => {
+        cell = cell.trim()
+        if (cell.startsWith(':') && cell.endsWith(':')) return 'center'
+        if (cell.endsWith(':')) return 'right'
+        return 'left'
+      })
+
+    // 确保表头和对齐信息数量匹配
+    if (headers.length === 0 || headers.length !== alignments.length)
+      return null
+
+    // 处理数据行
+    const rows = []
+    let currentIndex = startIndex + 2
+
+    while (
+      currentIndex < lines.length &&
+      lines[currentIndex].trim().startsWith('|') &&
+      lines[currentIndex].trim().endsWith('|')
+    ) {
+      const rowLine = lines[currentIndex].trim()
+      const cells = rowLine
+        .slice(1, -1) // 移除首尾的 |
+        .split('|')
+        .map((cell) => cell.trim())
+
+      if (cells.length === headers.length) {
+        rows.push(cells.map((cell) => this.parseInline(cell)))
+      }
+      currentIndex++
+    }
+
+    return {
+      type: 'table',
+      headers: headers.map((header) => this.parseInline(header)),
+      alignments,
+      rows,
+    }
+  }
+
+  // 解析行内元素
+  parseInline(text: string): Array<string | InlineElement> {
+    const currentText = text
+
+    // 处理字符串中的所有标记
+    const processText = (str: string): Array<string | InlineElement> => {
+      // 检查所有可能的匹配
+      const matches = [
+        { match: str.match(rules.markdown.bold), type: 'bold' },
+        { match: str.match(rules.markdown.italic), type: 'italic' },
+        { match: str.match(rules.markdown.link), type: 'link' },
+        { match: str.match(rules.markdown.image), type: 'image' },
+        { match: str.match(rules.markdown.inlineCode), type: 'inlineCode' },
+      ].filter((m) => m.match)
+
+      // 如果没有匹配，返回原文本
+      if (matches.length === 0) {
+        return str ? [str] : []
+      }
+
+      // 找到最早的匹配
+      const firstMatch = matches.reduce((earliest, current) => {
+        return current.match!.index! < earliest.match!.index!
+          ? current
+          : earliest
+      })
+
+      const { match, type } = firstMatch
+      const before = str.slice(0, match!.index)
+      const after = str.slice(match!.index! + match![0].length)
+
+      const result: Array<string | InlineElement> = []
+      if (before) result.push(before)
+
+      // 根据类型创建节点
+      if (type === 'link') {
+        result.push({
+          type: 'link',
+          text: match![1],
+          url: match![2],
+        })
+      } else if (type === 'image') {
+        result.push({
+          type: 'image',
+          alt: match![1],
+          src: match![2],
+        })
+      } else {
+        result.push({
+          type: type as 'bold' | 'italic' | 'link' | 'image' | 'inlineCode',
+          content: match![1],
+        })
+      }
+
+      // 递归处理剩余文本
+      result.push(...processText(after))
+
+      return result
+    }
+
+    return processText(currentText)
   }
 }
