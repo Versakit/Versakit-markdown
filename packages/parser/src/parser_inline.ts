@@ -1,118 +1,81 @@
-import { rules } from './rules'
+import { rules } from './ruler'
 import { InlineToken } from './types'
 
 export class ParserInline {
   parseInline(text: string): InlineToken[] {
-    const tokens: InlineToken[] = []
-    let currentText = text
+    const processText = (str: string): InlineToken[] => {
+      // 检查所有可能的匹配
+      const matches = [
+        { rule: rules.markdown.image, type: 'image' },
+        { rule: rules.markdown.link, type: 'link' },
+        { rule: rules.markdown.bold, type: 'bold' },
+        { rule: rules.markdown.italic, type: 'italic' },
+        { rule: rules.markdown.inlineCode, type: 'inlineCode' },
+        { rule: rules.markdown.strikethrough, type: 'strikethrough' },
+        { rule: rules.markdown.underline, type: 'underline' },
+        { rule: rules.markdown.subscript, type: 'subscript' },
+        { rule: rules.markdown.superscript, type: 'superscript' },
+        { rule: rules.markdown.audio, type: 'audio' },
+        { rule: rules.markdown.checkboxUnchecked, type: 'checkboxUnchecked' },
+        { rule: rules.markdown.checkboxChecked, type: 'checkboxChecked' },
+        { rule: rules.markdown.highlight, type: 'highlight' },
+      ]
+        .map(({ rule, type }) => {
+          const match = str.match(rule)
+          return match ? { match, type, index: match.index! } : null
+        })
+        .filter((m): m is NonNullable<typeof m> => m !== null)
 
-    // 处理图片
-    currentText = currentText.replace(rules.markdown.image, (_, alt, src) => {
-      tokens.push({ type: 'image', alt, src })
-      return ''
-    })
+      // 如果没有匹配，返回原文本
+      if (matches.length === 0) {
+        return str ? [{ type: 'text', content: str }] : []
+      }
 
-    // 处理链接
-    currentText = currentText.replace(rules.markdown.link, (_, text, url) => {
-      tokens.push({ type: 'link', text, url })
-      return ''
-    })
+      // 找到最早的匹配
+      matches.sort((a, b) => a.index - b.index)
+      const firstMatch = matches[0]
 
-    // 处理粗体
-    currentText = currentText.replace(rules.markdown.bold, (_, content) => {
-      tokens.push({ type: 'bold', content })
-      return ''
-    })
+      const before = str.slice(0, firstMatch.index)
+      const after = str.slice(firstMatch.index + firstMatch.match[0].length)
 
-    // 处理斜体
-    currentText = currentText.replace(rules.markdown.italic, (_, content) => {
-      tokens.push({ type: 'italic', content })
-      return ''
-    })
+      const result: InlineToken[] = []
+      if (before) {
+        result.push({ type: 'text', content: before })
+      }
 
-    // 处理行内代码
-    currentText = currentText.replace(
-      rules.markdown.inlineCode,
-      (_, content) => {
-        tokens.push({ type: 'inlineCode', content })
-        return ''
-      },
-    )
+      // 根据类型创建节点
+      switch (firstMatch.type) {
+        case 'link':
+          result.push({
+            type: 'link',
+            text: firstMatch.match[1],
+            url: firstMatch.match[2],
+          })
+          break
+        case 'image':
+          result.push({
+            type: 'image',
+            alt: firstMatch.match[1],
+            src: firstMatch.match[2],
+          })
+          break
+        case 'audio':
+          result.push({
+            type: 'audio',
+            src: firstMatch.match[1],
+          })
+          break
+        default:
+          result.push({
+            type: firstMatch.type,
+            content: firstMatch.match[1],
+          })
+      }
 
-    // 处理删除线
-    currentText = currentText.replace(
-      rules.markdown.strikethrough,
-      (_, content) => {
-        tokens.push({ type: 'strikethrough', content })
-        return ''
-      },
-    )
-
-    // 处理下划线
-    currentText = currentText.replace(
-      rules.markdown.underline,
-      (_, content) => {
-        tokens.push({ type: 'underline', content })
-        return ''
-      },
-    )
-
-    // 处理下标
-    currentText = currentText.replace(
-      rules.markdown.subscript,
-      (_, content) => {
-        tokens.push({ type: 'subscript', content })
-        return ''
-      },
-    )
-
-    // 处理上标
-    currentText = currentText.replace(
-      rules.markdown.superscript,
-      (_, content) => {
-        tokens.push({ type: 'superscript', content })
-        return ''
-      },
-    )
-
-    // 处理音频
-    currentText = currentText.replace(rules.markdown.audio, (_, src) => {
-      tokens.push({ type: 'audio', src })
-      return ''
-    })
-
-    // 处理未选复选框
-    currentText = currentText.replace(
-      rules.markdown.checkboxUnchecked,
-      (_, content) => {
-        tokens.push({ type: 'checkboxUnchecked', content })
-        return ''
-      },
-    )
-
-    // 处理已选复选框
-    currentText = currentText.replace(
-      rules.markdown.checkboxChecked,
-      (_, content) => {
-        tokens.push({ type: 'checkboxChecked', content })
-        return ''
-      },
-    )
-
-    // 处理高亮
-    currentText = currentText.replace(
-      rules.markdown.highlight,
-      (_, content) => {
-        tokens.push({ type: 'highlight', content })
-        return ''
-      },
-    )
-
-    // 处理剩余的普通文本
-    if (currentText.trim()) {
-      tokens.push({ type: 'text', content: currentText.trim() })
+      // 递归处理剩余文本
+      return result.concat(processText(after))
     }
 
-    return tokens
+    return processText(text)
   }
 }

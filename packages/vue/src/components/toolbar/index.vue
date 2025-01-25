@@ -5,7 +5,6 @@ import {
   H3,
   Bold,
   Italic,
-  Underline,
   StrikeThrough,
   OrderList,
   UnOrderList,
@@ -14,8 +13,6 @@ import {
   Link,
   Image,
   Table,
-  Video,
-  Audio,
 } from '../../../libs/index'
 </script>
 
@@ -31,8 +28,6 @@ import {
       <Bold />
 
       <Italic />
-
-      <Underline />
 
       <StrikeThrough />
     </div>
@@ -53,24 +48,39 @@ import {
       <Image />
 
       <Table />
-
-      <Video />
-
-      <Audio />
     </div>
   </div>
 </template>
 
-<style scoped lang="css">
+<style scoped lang="scss">
 .toolbar {
-  @apply p-2 border-b-2 border-gray-200 flex flex-wrap gap-2 dark:bg-zinc-800 dark:border-gray-600;
+  padding: 8px;
+  border-bottom: 2px solid #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  .dark & {
+    background-color: #222;
+    border-bottom-color: #4c5257;
+  }
 }
 
 .toolbar-group {
-  @apply flex gap-2 px-1 border-r-2 border-r-gray-200 justify-center items-center dark:border-gray-600;
-}
+  display: flex;
+  gap: 8px; // gap-2
+  padding-left: 4px;
+  padding-right: 4px; // px-1
+  border-right: 2px solid #e2e8f0; // border-r-2 border-r-gray-200
+  justify-content: center;
+  align-items: center;
 
-.toolbar-group:last-child {
-  @apply border-r-0;
+  .dark & {
+    border-right-color: #4c5257; // dark:border-gray-600
+  }
+
+  &:last-child {
+    border-right-width: 0; // border-r-0
+  }
 }
 </style>

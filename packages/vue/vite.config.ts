@@ -12,7 +12,7 @@ export default defineConfig({
     }),
   ], // 打包配置
   build: {
-    sourcemap: false,
+    sourcemap: true,
     rollupOptions: {
       external: ['vue'],
       output: [
@@ -38,6 +38,7 @@ export default defineConfig({
     },
     lib: {
       entry: 'index.ts',
+      name: 'index',
     },
     terserOptions: {
       compress: {

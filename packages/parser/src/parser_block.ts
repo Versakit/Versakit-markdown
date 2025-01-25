@@ -15,6 +15,7 @@ export class ParserBlock {
     let inCodeBlock = false
     let codeBlockContent: string[] = []
     let codeBlockLang = ''
+    let inPromptBlock = false
 
     const processParagraph = () => {
       if (currentParagraph.length > 0) {
@@ -107,6 +108,37 @@ export class ParserBlock {
           type: 'math',
           content: this.inlineParser.parseInline(content),
         })
+        continue
+      }
+
+      // 处理提示框开始
+      if (!inPromptBlock && rules.markdown.prompt.test(line)) {
+        processParagraph()
+        const match = line.match(rules.markdown.prompt)
+        promptType = match?.[1].toLowerCase() || 'info'
+        inPromptBlock = true
+        promptContent = []
+        continue
+      }
+
+      // 处理提示框结束
+      if (inPromptBlock && line === ':::') {
+        blocks.push({
+          type: 'prompt',
+          promptType,
+          content: this.inlineParser.parseInline(
+            promptContent.join('\n').trim(),
+          ),
+        })
+        inPromptBlock = false
+        promptType = ''
+        promptContent = []
+        continue
+      }
+
+      // 收集提示框内容
+      if (inPromptBlock) {
+        promptContent.push(line)
         continue
       }
 

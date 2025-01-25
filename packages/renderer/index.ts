@@ -1,3 +1,3 @@
-import { Renderer } from './src/render'
+import MarkDownRenderer from './src/render'
 
-export default { Renderer }
+export default MarkDownRenderer

@@ -7,12 +7,12 @@ import { ref, watch } from 'vue'
 const value = ref('')
 const ast = ref()
 const preview = ref()
-const markdownParser = new MarkdownParser.Parser()
-const markdownRenderer = new MarKdownRenderer.Renderer()
+const parser = new MarkdownParser.Parser()
+const markdownRenderer = new MarKdownRenderer()
 
 // 监听输入的内容变化
 const updateAST = () => {
-  ast.value = markdownParser.parseMarkdown(value.value)
+  ast.value = parser.parseMarkdown(value.value)
 }
 
 // 监听value的变化,更新AST
@@ -24,34 +24,48 @@ watch(value, () => {
 
 <template>
   <div class="container-box">
-    <div class="container">
+    <div class="rich">
       <VerRichEditor v-model:value="value" />
     </div>
 
     <div class="preview">
-      <h3>预览</h3>
+      <h3>输入的内容</h3>
+      <span>{{ value }}</span>
+
+      <h3>AST</h3>
+      <span>{{ ast }}</span>
+
+      <h2>预览</h2>
       <span v-html="preview"></span>
+
+      <h2>渲染器</h2>
+      <span>{{ preview }}</span>
     </div>
   </div>
 </template>
 
 <style scoped>
 .container-box {
-  width: 100%;
+  padding: 2rem;
   display: flex;
-  justify-content: space-between;
+  width: 100vw;
+  justify-content: center;
   align-items: center;
-  flex-direction: column;
+  flex-direction: row;
   height: 100vh;
+  overflow: hidden;
+  gap: 8px;
 }
 
-.container {
+.rich {
   width: 50%;
+  height: 100%;
 }
 
 .preview {
   width: 50%;
-  height: 1000px;
+  height: 100%;
   border: 1px solid #c4c4c4;
+  overflow-x: hidden;
 }
 </style>

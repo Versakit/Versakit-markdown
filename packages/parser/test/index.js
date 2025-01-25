@@ -1,30 +1,25 @@
-import parser from '@versakit/markdown-parser'
-
-// 创建解析器实例 - 使用默认导出中的 Parser 类
-const markdownParser = new parser.Parser()
+import MarkdownParser from '@versakit/markdown-parser'
 
 // 测试用例
-const markdown = `# Markdown Parser Test
+const markdownText = `
+# This is a header
 
-这是一个**粗体**和*斜体*的测试。
+This is a paragraph with **bold text** and *italic text*.
 
-## 链接和图片测试
-这是一个[链接](https://example.com)
-![图片](https://example.com/image.jpg)
+- List item 1
+- List item 2
+- List item 3
 
 > 这是一段引用文本
 > 这是一段引用文本2
 
-### 列表测试
-- 无序列表项 1
-- 无序列表项 2
+// 创建 Parser 实例
+const parser = new MarkdownParser.Parser()
 
-1. 有序列表项 1
-2. 有序列表项 2
+// 解析 Markdown 文本
+const ast = parser.parseMarkdown(markdownText)
 
 ### 多行测试
-
-
 
 
 ### 代码块测试
@@ -80,9 +75,10 @@ $$ E = mc^2^ $$
 
 ## 测试完成`
 
-// 解析 markdown
-const ast = markdownParser.parseMarkdown(markdown)
+const md = new MarkdownParser.Parser()
 
+// 解析 markdown
+const ast = md.parseMarkdown(markdownText)
 // 格式化输出
 console.log('解析结果：')
 console.log(JSON.stringify(ast, null, 2))
