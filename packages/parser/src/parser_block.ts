@@ -1,4 +1,4 @@
-import { rules } from './rules'
+import { rules } from './ruler'
 import { ASTNode } from './types'
 import { ParserInline } from './parser_inline'
 
@@ -12,10 +12,6 @@ export class ParserBlock {
   parseBlocks(lines: string[]): ASTNode[] {
     const blocks: ASTNode[] = []
     let currentParagraph: string[] = []
-    let inCodeBlock = false
-    let codeBlockContent: string[] = []
-    let codeBlockLang = ''
-    let inPromptBlock = false
 
     const processParagraph = () => {
       if (currentParagraph.length > 0) {
@@ -32,25 +28,24 @@ export class ParserBlock {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim()
 
-      // 处理代码块
-      if (rules.markdown.codeBlock.test(line) && !inCodeBlock) {
-        const [, lang] = line.match(rules.markdown.codeBlock) || []
-        inCodeBlock = true
-        codeBlockLang = lang
-        continue
-      }
-      if (inCodeBlock) {
-        if (line === '```') {
-          blocks.push({
-            type: 'codeBlock',
-            content: codeBlockContent.join('\n'),
-            lang: codeBlockLang,
-          })
-          inCodeBlock = false
-          codeBlockContent = []
-          continue
+      //处理代码块
+      if (line.trim().startsWith('```')) {
+        const lang = line.trim().slice(3)
+        const codeContent = []
+        i++
+
+        // 收集代码块内容直到遇到结束标记
+        while (i < lines.length && !lines[i].trim().startsWith('```')) {
+          codeContent.push(lines[i])
+          i++
         }
-        codeBlockContent.push(line)
+
+        blocks.push({
+          type: 'code',
+          lang: lang,
+          content: codeContent.join('\n'),
+        })
+
         continue
       }
 
@@ -112,35 +107,35 @@ export class ParserBlock {
       }
 
       // 处理提示框开始
-      if (!inPromptBlock && rules.markdown.prompt.test(line)) {
-        processParagraph()
-        const match = line.match(rules.markdown.prompt)
-        promptType = match?.[1].toLowerCase() || 'info'
-        inPromptBlock = true
-        promptContent = []
-        continue
-      }
+      // if (!inPromptBlock && rules.markdown.prompt.test(line)) {
+      //   processParagraph()
+      //   const match = line.match(rules.markdown.prompt)
+      //   promptType = match?.[1].toLowerCase() || 'info'
+      //   inPromptBlock = true
+      //   promptContent = []
+      //   continue
+      // }
 
-      // 处理提示框结束
-      if (inPromptBlock && line === ':::') {
-        blocks.push({
-          type: 'prompt',
-          promptType,
-          content: this.inlineParser.parseInline(
-            promptContent.join('\n').trim(),
-          ),
-        })
-        inPromptBlock = false
-        promptType = ''
-        promptContent = []
-        continue
-      }
+      // // 处理提示框结束
+      // if (inPromptBlock && line === ':::') {
+      //   blocks.push({
+      //     type: 'prompt',
+      //     promptType,
+      //     content: this.inlineParser.parseInline(
+      //       promptContent.join('\n').trim(),
+      //     ),
+      //   })
+      //   inPromptBlock = false
+      //   promptType = ''
+      //   promptContent = []
+      //   continue
+      // }
 
-      // 收集提示框内容
-      if (inPromptBlock) {
-        promptContent.push(line)
-        continue
-      }
+      // // 收集提示框内容
+      // if (inPromptBlock) {
+      //   promptContent.push(line)
+      //   continue
+      // }
 
       // 处理段落
       if (line === '') {

@@ -3,7 +3,10 @@ import { InlineToken } from './types'
 
 export class ParserInline {
   parseInline(text: string): InlineToken[] {
-    const processText = (str: string): InlineToken[] => {
+    const result: InlineToken[] = []
+    let remainingText = text
+
+    while (remainingText) {
       // 检查所有可能的匹配
       const matches = [
         { rule: rules.markdown.image, type: 'image' },
@@ -21,29 +24,32 @@ export class ParserInline {
         { rule: rules.markdown.highlight, type: 'highlight' },
       ]
         .map(({ rule, type }) => {
-          const match = str.match(rule)
+          const match = remainingText.match(rule)
           return match ? { match, type, index: match.index! } : null
         })
         .filter((m): m is NonNullable<typeof m> => m !== null)
 
-      // 如果没有匹配，返回原文本
+      // 如果没有匹配，保存剩余文本并退出
       if (matches.length === 0) {
-        return str ? [{ type: 'text', content: str }] : []
+        result.push({ type: 'text', content: remainingText })
+        break
       }
 
       // 找到最早的匹配
       matches.sort((a, b) => a.index - b.index)
       const firstMatch = matches[0]
 
-      const before = str.slice(0, firstMatch.index)
-      const after = str.slice(firstMatch.index + firstMatch.match[0].length)
+      const before = remainingText.slice(0, firstMatch.index)
+      const after = remainingText.slice(
+        firstMatch.index + firstMatch.match[0].length,
+      )
 
-      const result: InlineToken[] = []
+      // 保存前面的普通文本
       if (before) {
         result.push({ type: 'text', content: before })
       }
 
-      // 根据类型创建节点
+      // 根据匹配类型生成节点
       switch (firstMatch.type) {
         case 'link':
           result.push({
@@ -72,10 +78,10 @@ export class ParserInline {
           })
       }
 
-      // 递归处理剩余文本
-      return result.concat(processText(after))
+      // 更新剩余文本
+      remainingText = after
     }
 
-    return processText(text)
+    return result
   }
 }
