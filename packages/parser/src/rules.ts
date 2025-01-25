@@ -27,9 +27,6 @@ export const rules: Rules = {
     highlight: /==(.*?)==/g,
     // 匹配数学公式
     math: /^\$\$([\s\S]*?)\$\$$/,
-    // 匹配提示框
-    prompt:
-      /^::: (default|primary|info|success|warning|danger|comment|Notice|tips|error)\s+([\s\S]*?):::$/,
 
     // 匹配链接
     link: /\[(.+?)\]\((.+?)\)/,
