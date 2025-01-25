@@ -11,6 +11,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import store from '../../../store/store.ts'
 import type { RichProps } from '../../type.ts'
+import UndoRedoManager from '../../../utils/undoRedoManager.ts' // 确保路径正确
 
 const editorRef = ref<HTMLElement | null>(null)
 const currentRow = ref(1)
@@ -63,14 +64,33 @@ const customUpdateFunction = () => {
 // 注册观察者到 store
 const unsubscribe = store.attach(customUpdateFunction)
 
+// 初始化 UndoRedoManager
+const undoRedoManager = ref<UndoRedoManager | null>(null)
+
 // 生命周期钩子
 onMounted(() => {
   if (editorRef.value) {
     store.actions({ editorRef: editorRef.value })
-  }
 
-  document.addEventListener('selectionchange', updateCursorPosition)
-  editorRef.value?.addEventListener('input', customUpdateFunction)
+    // 初始化 UndoRedoManager
+    undoRedoManager.value = new UndoRedoManager(editorRef.value)
+
+    document.addEventListener('selectionchange', updateCursorPosition)
+    editorRef.value.addEventListener('input', customUpdateFunction)
+
+    // 监听键盘事件
+    document.addEventListener('keydown', (event) => {
+      if (event.ctrlKey) {
+        if (event.key === 'z') {
+          event.preventDefault() // 阻止默认行为
+          undoRedoManager.value?.undo()
+        } else if (event.key === 'y') {
+          event.preventDefault() // 阻止默认行为
+          undoRedoManager.value?.redo()
+        }
+      }
+    })
+  }
 })
 
 onUnmounted(() => {
@@ -80,27 +100,4 @@ onUnmounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-.editor {
-  padding: 1rem;
-  outline: none;
-  min-height: 400px;
-}
-
-.status-bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  font-size: 12px;
-  color: #888; // text-gray-500
-  padding: 2px;
-  user-select: none;
-
-  &.dark {
-    color: #fff; // dark:text-white
-    background-color: #222; // dark:bg-zinc-800
-    border-color: #4c5257; // dark:border-gray-600
-  }
-}
-</style>
+<style lang="scss" scoped src="./index.scss"></style>
