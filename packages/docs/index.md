@@ -5,7 +5,9 @@ layout: home
 hero:
   name: 'Versakit Markdown'
   text: '现代Markdown编辑器'
-  tagline: Versakit Markdown
+  image:
+    src: logo.svg
+    alt: Versakit
   actions:
     - theme: brand
       text: 开始
@@ -15,10 +17,11 @@ hero:
       link: /api-examples
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - icon: ☕
+    title: 轻量级
+    details: 轻量级的Markdown编辑器
+
+  - icon: 😎
+    title: 类型支持
+    details: 完全使用TypeScript开发
 ---
