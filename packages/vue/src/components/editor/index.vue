@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="editor" contenteditable="true" ref="editorRef" />
+    <div class="editor" contenteditable="plaintext-only" ref="editorRef" />
     <div class="status-bar">
       <div>行: {{ currentRow }}, 列: {{ currentColumn }}</div>
     </div>
@@ -56,6 +56,7 @@ const updateCursorPosition = () => {
 // 定义更新函数，处理状态更新时的逻辑
 const customUpdateFunction = () => {
   const textContent = editorRef.value?.textContent || ''
+  console.log(editorRef.value.innerText)
 
   // 更新父组件的 value
   emit('update:value', textContent)
