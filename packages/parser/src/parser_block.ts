@@ -24,11 +24,15 @@ export class ParserBlock {
 
     const processParagraph = () => {
       if (currentParagraph.length > 0) {
+        const content = currentParagraph.join(' ').trim()
         blocks.push({
           type: 'paragraph',
-          content: this.inlineParser.parseInline(
-            currentParagraph.join(' ').trim(),
-          ),
+          children: [
+            {
+              type: 'text',
+              text: content,
+            },
+          ],
         })
         currentParagraph = []
       }

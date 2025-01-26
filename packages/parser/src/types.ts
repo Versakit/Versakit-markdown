@@ -31,10 +31,23 @@ export interface Rules {
 
 export interface ASTNode {
   type: string
+
   children?: ASTNode[]
+
+  text?: string
+
   depth?: number
-  content?: string | InlineToken[]
+
+  content?: any
+
   lang?: string
+
+  rows?: any[]
+
+  headers?: any[]
+
+  alignments?: string[]
+
   ordered?: boolean
 }
 
@@ -46,3 +59,10 @@ export interface InlineToken {
   alt?: string
   src?: string
 }
+
+export interface TextNode {
+  type: 'text'
+  text: string
+}
+
+export type Node = ASTNode | TextNode
