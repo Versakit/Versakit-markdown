@@ -1,3 +1,4 @@
 import { Renderer } from './src/renderer_core'
+import { RendererText } from './src/renderer_text'
 
-export default Renderer
+export { Renderer, RendererText }

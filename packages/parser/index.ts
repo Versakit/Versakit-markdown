@@ -1,9 +1,11 @@
 import { Parser } from './src/parser_core'
 import { rules } from './src/ruler'
 
-// 导出 Parser 类
-export { Parser }
-export { rules }
+// 同时提供具名导出和默认导出
+export { Parser, rules }
 
-// 为了兼容 UMD 格式，添加默认导出
-export default Parser
+// 默认导出
+export default {
+  Parser,
+  rules,
+}
