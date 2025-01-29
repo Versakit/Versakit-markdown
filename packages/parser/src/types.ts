@@ -29,40 +29,18 @@ export interface Rules {
   }
 }
 
+// 修改 ASTNode 接口以匹配 renderer 需求
 export interface ASTNode {
   type: string
-
   children?: ASTNode[]
-
-  text?: string
-
   depth?: number
-
-  content?: any
-
-  lang?: string
-
-  rows?: any[]
-
-  headers?: any[]
-
-  alignments?: string[]
-
+  value?: string
   ordered?: boolean
-}
-
-export interface InlineToken {
-  type: string
-  content?: string
-  text?: string
   url?: string
+  title?: string
   alt?: string
-  src?: string
+  lang?: string
 }
 
-export interface TextNode {
-  type: 'text'
-  text: string
-}
-
-export type Node = ASTNode | TextNode
+// 移除不再需要的接口
+export type Node = ASTNode

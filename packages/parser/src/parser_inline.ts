@@ -1,9 +1,9 @@
 import { rules } from './ruler'
-import { InlineToken } from './types'
+import type { ASTNode } from './types'
 
 export class ParserInline {
-  parseInline(text: string): InlineToken[] {
-    const result: InlineToken[] = []
+  parseInline(text: string): ASTNode[] {
+    const tokens: ASTNode[] = []
     let remainingText = text
 
     while (remainingText) {
@@ -32,7 +32,7 @@ export class ParserInline {
 
       // 如果没有匹配，保存剩余文本并退出
       if (matches.length === 0) {
-        result.push({ type: 'text', content: remainingText })
+        tokens.push({ type: 'text', value: remainingText })
         break
       }
 
@@ -47,35 +47,41 @@ export class ParserInline {
 
       // 保存前面的普通文本
       if (before) {
-        result.push({ type: 'text', content: before })
+        tokens.push({ type: 'text', value: before })
       }
 
       // 根据匹配类型生成节点
       switch (firstMatch.type) {
         case 'link':
-          result.push({
+          tokens.push({
             type: 'link',
-            text: firstMatch.match[1],
             url: firstMatch.match[2],
+            title: firstMatch.match[1],
+            children: [
+              {
+                type: 'text',
+                value: firstMatch.match[1],
+              },
+            ],
           })
           break
         case 'image':
-          result.push({
+          tokens.push({
             type: 'image',
+            url: firstMatch.match[2],
             alt: firstMatch.match[1],
-            src: firstMatch.match[2],
           })
           break
         case 'audio':
-          result.push({
+          tokens.push({
             type: 'audio',
-            src: firstMatch.match[1],
+            url: firstMatch.match[1],
           })
           break
         default:
-          result.push({
+          tokens.push({
             type: firstMatch.type,
-            content: firstMatch.match[1],
+            value: firstMatch.match[1],
           })
       }
 
@@ -83,6 +89,6 @@ export class ParserInline {
       remainingText = after
     }
 
-    return result
+    return tokens
   }
 }

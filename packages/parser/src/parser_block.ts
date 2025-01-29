@@ -4,11 +4,10 @@ import { ParserInline } from './parser_inline'
 
 interface InlineElement {
   type: 'bold' | 'italic' | 'link' | 'image' | 'inlineCode'
-  content?: string
-  text?: string
+  value?: string
   url?: string
   alt?: string
-  src?: string
+  children?: ASTNode[]
 }
 
 export class ParserBlock {
@@ -24,13 +23,12 @@ export class ParserBlock {
 
     const processParagraph = () => {
       if (currentParagraph.length > 0) {
-        const content = currentParagraph.join(' ').trim()
         blocks.push({
           type: 'paragraph',
           children: [
             {
               type: 'text',
-              text: content,
+              value: currentParagraph.join(' ').trim(),
             },
           ],
         })
@@ -41,24 +39,40 @@ export class ParserBlock {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim()
 
-      //处理代码块
-      if (line.trim().startsWith('```')) {
-        const lang = line.trim().slice(3)
-        const codeContent = []
+      if (line.startsWith('```')) {
+        processParagraph()
+        const lang = line.slice(3)
+        const codeLines = []
         i++
 
-        // 收集代码块内容直到遇到结束标记
         while (i < lines.length && !lines[i].trim().startsWith('```')) {
-          codeContent.push(lines[i])
+          codeLines.push(lines[i])
           i++
         }
 
         blocks.push({
           type: 'code',
-          lang: lang,
-          content: codeContent.join('\n'),
+          lang,
+          value: codeLines.join('\n'),
         })
 
+        continue
+      }
+
+      // 处理标题
+      if (rules.markdown.heading.test(line)) {
+        processParagraph()
+        const [, level, content] = line.match(rules.markdown.heading) || []
+        blocks.push({
+          type: 'heading',
+          depth: level.length,
+          children: [
+            {
+              type: 'text',
+              value: content,
+            },
+          ],
+        })
         continue
       }
 
@@ -72,41 +86,25 @@ export class ParserBlock {
         }
       }
 
-      // 处理标题
-      if (rules.markdown.heading.test(line)) {
-        processParagraph()
-        const [, level, content] = line.match(rules.markdown.heading) || []
-        blocks.push({
-          type: 'heading',
-          depth: level.length,
-          content: this.inlineParser.parseInline(content),
-        })
-        continue
-      }
-
       // 处理引用
       if (rules.markdown.blockquote.test(line)) {
         processParagraph()
         const [, content] = line.match(rules.markdown.blockquote) || []
         blocks.push({
           type: 'blockquote',
-          content: this.inlineParser.parseInline(content),
+          children: this.inlineParser.parseInline(content),
         })
         continue
       }
 
       // 处理列表
-      if (
-        rules.markdown.checkboxUnchecked.exec(line) &&
-        rules.markdown.checkboxChecked.exec(line) &&
-        rules.markdown.list.test(line)
-      ) {
+      if (rules.markdown.list.test(line)) {
         processParagraph()
         const [, marker, content] = line.match(rules.markdown.list) || []
         blocks.push({
           type: 'listItem',
           ordered: /^\d+\./.test(marker),
-          content: this.inlineParser.parseInline(content),
+          children: this.inlineParser.parseInline(content),
         })
         continue
       }
@@ -124,7 +122,7 @@ export class ParserBlock {
         const [, content] = line.match(rules.markdown.math) || []
         blocks.push({
           type: 'math',
-          content: this.inlineParser.parseInline(content),
+          value: content,
         })
         continue
       }
@@ -207,11 +205,11 @@ export class ParserBlock {
   }
 
   // 解析行内元素
-  parseInline(text: string): Array<string | InlineElement> {
+  parseInline(text: string): ASTNode[] {
     const currentText = text
 
     // 处理字符串中的所有标记
-    const processText = (str: string): Array<string | InlineElement> => {
+    const processText = (str: string): ASTNode[] => {
       // 检查所有可能的匹配
       const matches = [
         { match: str.match(rules.markdown.bold), type: 'bold' },
@@ -223,7 +221,7 @@ export class ParserBlock {
 
       // 如果没有匹配，返回原文本
       if (matches.length === 0) {
-        return str ? [str] : []
+        return str ? [{ type: 'text', value: str }] : []
       }
 
       // 找到最早的匹配
@@ -237,26 +235,31 @@ export class ParserBlock {
       const before = str.slice(0, match!.index)
       const after = str.slice(match!.index! + match![0].length)
 
-      const result: Array<string | InlineElement> = []
-      if (before) result.push(before)
+      const result: ASTNode[] = []
+      if (before) result.push({ type: 'text', value: before })
 
       // 根据类型创建节点
       if (type === 'link') {
         result.push({
           type: 'link',
-          text: match![1],
           url: match![2],
+          children: [
+            {
+              type: 'text',
+              value: match![1],
+            },
+          ],
         })
       } else if (type === 'image') {
         result.push({
           type: 'image',
+          url: match![2],
           alt: match![1],
-          src: match![2],
         })
       } else {
         result.push({
-          type: type as 'bold' | 'italic' | 'link' | 'image' | 'inlineCode',
-          content: match![1],
+          type: type as 'bold' | 'italic' | 'inlineCode',
+          value: match![1],
         })
       }
 
