@@ -1,25 +1,17 @@
 import { defineConfig } from 'vitepress'
+import { getGuideSidebar } from '../.vitepress/config/getGuideSidebar'
+import { getNav } from '../.vitepress/config/nav'
 
-// https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Versakit Markdown',
   description: 'Versakit Markdown',
   themeConfig: {
-    // https://vitepress.dev/reference/default-theme-config
-    nav: [
-      { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/examples' },
-    ],
-
-    sidebar: [
-      {
-        text: 'Examples',
-        items: [],
-      },
-    ],
-
+    nav: getNav(),
+    sidebar: {
+      '/guide/': getGuideSidebar(),
+    } as any,
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/vuejs/vitepress' },
+      { icon: 'github', link: 'https://github.com/Simonmie/Versakit-markdown' },
     ],
   },
   vite: {
