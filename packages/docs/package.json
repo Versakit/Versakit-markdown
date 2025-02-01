@@ -15,7 +15,7 @@
     "vitepress": "^1.5.0"
   },
   "dependencies": {
-    "@versakit/markdown-vue": "workspace:*",
+    "@versakit/markdown-vue": "^0.0.0",
     "vitepress-plugin-group-icons": "^1.3.5"
   }
 }
