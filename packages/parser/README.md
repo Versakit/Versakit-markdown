@@ -1,16 +1,16 @@
-# Parser
+# VersakitMarkdown-Parser
 
-这是一个用于将 Markdown 转换为抽象语法树（AST）的解析器。
+This is a markdown parser which is used to parse markdown to AST.
 
-## 安装
+## Install
 
 ```bash
 npm install @versakit/parser
 ```
 
-## 使用
+## Usage
 
-```TypeScript
+```ts
 import { MarkdownParser } from '@versakit/parser'
 const md = "# Hello World"
 const parser = new MarkdownParser.Parser()

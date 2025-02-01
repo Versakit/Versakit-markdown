@@ -1,31 +1,31 @@
-# Renderer
+# VersakitMarkdown-Renderer
 
-这是一个用于将Markdown抽象语法树（AST）渲染为HTML的Markdown渲染器。
+This is a markdown renderer which is used to render markdown-ast to html.
 
-## 安装
+## Install
 
 ```bash
 npm install @versakit/markdown-renderer
 ```
 
-## 使用
+## Usage
 
-首先需要安装`@versakit/parser`。
+you need to install `@versakit/parser` first.
 
-### 可用方法
+Available Methods:
 
-- **Renderer**：这是默认的渲染器，用于将Markdown的抽象语法树（AST）转换为HTML。它还提供了一种差异算法，可以高效处理AST中的变化。
-- **RendererText**：该方法将AST转换为纯HTML文本。当你需要生成不进行额外处理的HTML内容时，它非常有用。
+- Renderer: This is the default renderer that converts the Markdown Abstract Syntax Tree (AST) to HTML. It also provides a diff algorithm to efficiently handle changes in the AST.
+- RendererText: This method converts the AST to plain HTML text. It is useful when you need to generate HTML content without additional processing.
 
-### 示例
+### Example
 
-我们提供了一个简单的示例来展示如何使用渲染器：
+We provide a simple example to show how to use the renderer.
 
 ```html
 <!DOCTYPE html>
 <html lang="zh-CN">
   <head>
-    <title>Markdown 编辑器</title>
+    <title>Markdown Editer</title>
   </head>
   <body>
     <div class="editor-container">
@@ -41,24 +41,24 @@ npm install @versakit/markdown-renderer
     <script src="./parser.js"></script>
     <script src="./renderer.js"></script>
     <script>
-      // 创建 parser 实例
+      // create parser instance
       const parser = new Parser();
       let renderer = null;
 
-      // 获取 textarea
+      // get textarea
       const textarea = document.querySelector(".markdown-input");
 
-      // 初始 markdown 内容
+      // initial markdown
       const initialMarkdown = textarea.value;
       const initialAst = parser.parseMarkdown(initialMarkdown);
 
-      // 创建 renderer 实例
+      // create renderer instance
       renderer = new Renderer({
         ast: initialAst,
         container: "#preview",
       });
 
-      // 监听输入框变化
+      // listen for input changes
       textarea.addEventListener("input", (e) => {
         const markdown = e.target.value;
         const ast = parser.parseMarkdown(markdown);
@@ -67,7 +67,7 @@ npm install @versakit/markdown-renderer
         }
       });
 
-      // 检查链接有效性
+      // check link validity
       function checkLinkValidity(url) {
         try {
           new URL(url);
@@ -77,16 +77,16 @@ npm install @versakit/markdown-renderer
         }
       }
 
-      // 为无效链接添加样式并绑定事件监听
+      // add invalid link class and event listener
       const links = document.querySelectorAll("a");
       links.forEach((link) => {
         const href = link.getAttribute("href");
         if (!checkLinkValidity(href)) {
           link.classList.add("invalid-link");
-          link.title = "链接无效，请重新检查";
+          link.title = " link invalid is not valid please check again";
           link.addEventListener("click", (e) => {
             e.preventDefault();
-            alert("链接无效，请重新检查");
+            alert("link invalid is not valid please check again");
           });
         }
       });
@@ -103,9 +103,7 @@ const md = "# Hello World"
 const parser = new MarkdownParser.Parser()
 const ast = parser.parse(md)
 
-// 使用 Renderer 渲染
+// Render using Renderer
 const html = Renderer.render(ast)
-console.log(html) // 输出: <h1>Hello World</h1>
+console.log(html) // Output: <h1>Hello World</h1>
 ```
-
-这样，您就可以使用VersakitMarkdown-Renderer来渲染Markdown内容了。

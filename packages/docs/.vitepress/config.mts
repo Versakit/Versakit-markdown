@@ -4,6 +4,7 @@ import { getNav } from '../.vitepress/config/nav'
 
 export default defineConfig({
   title: 'Versakit Markdown',
+  base: '/Versakit-markdown/',
   description: 'Versakit Markdown',
   themeConfig: {
     nav: getNav(),
