@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { VerRichEditor } from '@versakit/markdown-vue'
-import MarkdownParser from '@versakit/markdown-parser'
+import { Parser } from '@versakit/markdown-parser'
 import { RendererText, Renderer } from '@versakit/markdown-renderer'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 
@@ -8,7 +8,7 @@ const value = ref('')
 const ast = ref()
 const preview = ref()
 const diffContainer = ref<HTMLDivElement>()
-const parser = new MarkdownParser.Parser()
+const parser = new Parser()
 const markdownRenderer = new RendererText()
 let diffRenderer: Renderer
 
