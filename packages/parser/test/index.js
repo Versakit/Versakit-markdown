@@ -94,6 +94,7 @@ const ast = md.parseMarkdown(markdownText2)
 // 格式化输出
 console.log('解析结果：')
 console.log(JSON.stringify(ast, null, 2))
+// console.log(JSON.stringify(ast2, null, 2))
 
 // 测试特定节点
 console.log('\n验证解析结果：')
