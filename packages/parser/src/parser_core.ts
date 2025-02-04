@@ -10,7 +10,7 @@ export class Parser {
   }
 
   parseMarkdown(text: string): ASTNode {
-    const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '')
+    const lines = text.split(/\n/).filter((line) => line.trim() !== '')
     return {
       type: 'document',
       children: this.blockParser.parseBlocks(lines),

@@ -1,115 +1,143 @@
 import { rules } from './rules'
 import { InlineToken, InlineTokenType } from './types'
 
+// 定义匹配优先级
+const INLINE_RULES: { type: InlineTokenType; regex: RegExp }[] = [
+  { type: 'audio', regex: rules.markdown.audio },
+  { type: 'image', regex: rules.markdown.image },
+  { type: 'italic', regex: rules.markdown.italic },
+  { type: 'bold', regex: rules.markdown.bold },
+  { type: 'highlight', regex: rules.markdown.highlight },
+  { type: 'inlineCode', regex: rules.markdown.inlineCode },
+  { type: 'strikethrough', regex: rules.markdown.strikethrough },
+  { type: 'superscript', regex: rules.markdown.superscript },
+  { type: 'subscript', regex: rules.markdown.subscript },
+  { type: 'link', regex: rules.markdown.link },
+  { type: 'inlineMath', regex: rules.markdown.inlineMath },
+  { type: 'underline', regex: rules.markdown.underline },
+  { type: 'inlineCode', regex: rules.markdown.inlineCode },
+  { type: 'footnoteReference', regex: rules.markdown.footnoteReference },
+]
+
 export class ParserInline {
   parseInline(text: string): InlineToken[] {
     const tokens: InlineToken[] = []
-    let currentText = text
+    let index = 0
+    const length = text.length
 
-    // 递归处理匹配和插入标记
-    const matchAndPush = (regex: RegExp, type: InlineTokenType) => {
-      let match
-      while ((match = regex.exec(currentText))) {
-        console.log(
-          `Matched: ${match[0]}, Type: ${type}, match[1]: ${match[1]}`,
-        )
+    // 主扫描循环
+    while (index < length) {
+      let bestMatch: {
+        type: InlineTokenType
+        start: number
+        end: number
+        groups: string[]
+      } | null = null
 
-        switch (type) {
-          case 'strikethrough':
-          case 'bold':
-          case 'italic':
-          case 'inlineCode':
-          case 'underline':
-          case 'highlight':
-          case 'superscript':
-          case 'subscript':
-            // 处理标记内容
-            const content = match[1] ? this.parseInline(match[1]) : match[0]
-            tokens.push({
+      // 寻找优先级最高的匹配
+      for (const { type, regex } of INLINE_RULES) {
+        regex.lastIndex = index
+        const match = regex.exec(text)
+        if (match && match.index >= index) {
+          const start = match.index
+          const end = start + match[0].length
+          if (!bestMatch || start < bestMatch.start) {
+            bestMatch = {
               type,
-              content,
-            })
-            break
-          case 'image':
-            tokens.push({
-              type: 'image',
-              alt: match[1] ?? '',
-              url: match[2] ?? '',
-            })
-            break
-          case 'footnoteReference':
-          case 'link':
-            tokens.push({
-              type,
-              text: match[1] ?? '',
-              url: match[2] ?? '',
-            })
-            break
-        }
-
-        // 更新当前文本，移除已经匹配的部分
-        currentText =
-          currentText.slice(0, match.index) +
-          currentText.slice(match.index + match[0].length)
-      }
-    }
-
-    // 先处理链接和图片
-    const linkImageRegexs = [
-      { regex: rules.markdown.link, type: 'link' as InlineTokenType },
-      { regex: rules.markdown.image, type: 'image' as InlineTokenType },
-    ]
-
-    // 逐个匹配处理链接和图片
-    for (const { regex, type } of linkImageRegexs) {
-      matchAndPush(regex, type)
-    }
-
-    // 然后处理其他内联元素
-    const regexs = [
-      {
-        regex: rules.markdown.strikethrough,
-        type: 'strikethrough' as InlineTokenType,
-      },
-      { regex: rules.markdown.bold, type: 'bold' as InlineTokenType },
-      { regex: rules.markdown.italic, type: 'italic' as InlineTokenType },
-      {
-        regex: rules.markdown.inlineCode,
-        type: 'inlineCode' as InlineTokenType,
-      },
-      { regex: rules.markdown.underline, type: 'underline' as InlineTokenType },
-      { regex: rules.markdown.highlight, type: 'highlight' as InlineTokenType },
-      {
-        regex: rules.markdown.superscript,
-        type: 'superscript' as InlineTokenType,
-      },
-      { regex: rules.markdown.subscript, type: 'subscript' as InlineTokenType },
-      {
-        regex: rules.markdown.footnoteReference,
-        type: 'footnoteReference' as InlineTokenType,
-      },
-    ]
-
-    // 逐个匹配处理其他标记
-    while (currentText.trim()) {
-      let matched = false
-
-      for (const { regex, type } of regexs) {
-        const match = regex.exec(currentText)
-        if (match) {
-          matchAndPush(regex, type) // 递归处理匹配到的标记
-          matched = true
-          break // 处理完一个标记后，跳出当前循环
+              start,
+              end,
+              groups: match.slice(1),
+            }
+          }
         }
       }
 
-      // 如果没有匹配到任何标记，就处理普通文本
-      if (!matched) {
-        tokens.push({ type: 'text', content: currentText.trim() })
+      if (bestMatch) {
+        // 处理前面的普通文本
+        if (bestMatch.start > index) {
+          tokens.push({
+            type: 'text',
+            value: text.slice(index, bestMatch.start),
+          })
+        }
+
+        // 处理匹配到的语法
+        tokens.push(this.processToken(bestMatch.type, bestMatch.groups))
+
+        // 更新索引
+        index = bestMatch.end
+      } else {
+        // 处理剩余文本
+        tokens.push({
+          type: 'text',
+          value: text.slice(index),
+        })
         break
       }
     }
 
     return tokens
+  }
+
+  private processToken(type: InlineTokenType, groups: string[]): InlineToken {
+    switch (type) {
+      case 'image':
+        return {
+          type: 'image',
+          alt: groups[0] || '',
+          url: groups[1] || '',
+        }
+
+      case 'link':
+        return {
+          type: 'link',
+          url: groups[1] || '',
+          children: this.parseInline(groups[0] || ''),
+        }
+
+      case 'inlineCode':
+        return {
+          type: 'inlineCode',
+          value: groups[0] || '',
+        }
+
+      case 'bold':
+      case 'italic':
+      case 'strikethrough':
+        return {
+          type,
+          children: this.parseInline(groups[0]),
+        }
+      case 'underline':
+      case 'highlight':
+        return {
+          type: 'highlight',
+          children: this.parseInline(groups[0]),
+        }
+      case 'superscript':
+      case 'subscript':
+        return {
+          type,
+          children: this.parseInline(groups[0] || ''),
+        }
+      case 'inlineMath':
+        return {
+          type: 'inlineMath',
+          value: groups[0],
+        }
+      case 'footnoteReference':
+        return {
+          type: 'footnoteReference',
+          label: groups[0] || '',
+        }
+      case 'audio':
+        return {
+          type: 'audio',
+          alt: groups[0],
+          url: groups[1],
+        }
+      default:
+        return { type: 'text', value: groups[0] || '' }
+    }
   }
 }

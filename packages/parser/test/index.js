@@ -1,47 +1,33 @@
-import parser from '@versakit/markdown-parser'
+import MarkdownParser from '@versakit/markdown-parser'
+const markdownText1 = `
+表格
 
-// 创建解析器实例 - 使用默认导出中的 Parser 类
-const markdownParser = new parser.Parser()
+| 标题1 | 标题2 | 标题3 |
+| ----- | ----- | ----- |
+| 内容1 | 内容2 | 内容3 |
+| 内容1 | 内容2 | 内容3 |
+----------------
+`
 
 // 测试用例
-const markdown = `# Markdown Parser Test
+// const markdownText2 = `
 
-这是一个**粗体**和*斜体*的测试。
+// ### 分割线
 
-## 链接和图片测试
-这是一个[链接](https://example.com)
-![图片](https://example.com/image.jpg)
+// ## 测试完成`
 
-> 这是一段引用文本
-
-### 列表测试
-- 无序列表项 1
-- 无序列表项 2
-
-1. 有序列表项 1
-2. 有序列表项 2
-
-### 代码块测试
-\`\`\`javascript
-console.log('Hello World');
-const test = 123;
-\`\`\`
-
-这是一段包含\`行内代码\`的文本。
-
----
-
-## 测试完成`
+const md = new MarkdownParser.Parser()
 
 // 解析 markdown
-const ast = markdownParser.parseMarkdown(markdown)
-
+const ast1 = md.parseMarkdown(markdownText1)
+// const ast2 = md.parseMarkdown(markdownText2)
 // 格式化输出
 console.log('解析结果：')
-console.log(JSON.stringify(ast, null, 2))
+console.log(JSON.stringify(ast1, null, 2))
+// console.log(JSON.stringify(ast2, null, 2))
 
 // 测试特定节点
 console.log('\n验证解析结果：')
-console.log('文档类型:', ast.type)
-console.log('子节点数量:', ast.children?.length)
-console.log('第一个标题:', ast.children?.[0])
+// console.log('文档类型:', ast.type)
+// console.log('子节点数量:', ast.children?.length)
+// console.log('第一个标题:', ast.children?.[0])

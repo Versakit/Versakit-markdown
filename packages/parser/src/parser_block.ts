@@ -4,165 +4,459 @@ import { ParserInline } from './parser_inline'
 
 export class ParserBlock {
   private inlineParser: ParserInline
+  private currentList: ASTNode | null = null
+  private currentTimeline: ASTNode | null = null
 
   constructor() {
     this.inlineParser = new ParserInline()
   }
 
   parseBlocks(lines: string[]): ASTNode[] {
-    const blocks: ASTNode[] = [] // 存储解析后的 AST 节点
-    let currentParagraph: string[] = [] // 当前段落的内容
-    let inCodeBlock = false // 是否在代码块内
-    let codeBlockContent: string[] = [] // 代码块内容
-    let codeBlockLang = '' // 代码块语言
+    const blocks: ASTNode[] = []
+    let currentParagraph: string[] = []
+    const codeBlockState = { active: false, lang: '', content: [] as string[] }
 
-    const processParagraph = () => {
+    // 处理各种块级元素的关闭
+    const finalizeContext = () => {
+      // 关闭段落
       if (currentParagraph.length > 0) {
-        blocks.push({
-          type: 'paragraph',
-          content: this.inlineParser.parseInline(
-            currentParagraph.join(' ').trim(),
-          ),
-        })
+        blocks.push(this.createParagraph(currentParagraph))
         currentParagraph = []
       }
+
+      // 关闭列表
+      if (this.currentList) {
+        blocks.push(this.currentList)
+        this.currentList = null
+      }
+
+      // 关闭时间线
+      if (this.currentTimeline) {
+        blocks.push(this.currentTimeline)
+        this.currentTimeline = null
+      }
     }
+
+    // 主循环
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim()
+      const line = lines[i].trimEnd()
 
-      // 处理代码块
-      if (rules.markdown.codeBlock.test(line) && !inCodeBlock) {
-        const [, lang] = line.match(rules.markdown.codeBlock) || []
-        inCodeBlock = true
-        codeBlockLang = lang
-        continue
-      }
-      if (inCodeBlock) {
-        if (line === '```') {
-          blocks.push({
-            type: 'codeBlock',
-            content: codeBlockContent.join('\n'),
-            lang: codeBlockLang,
-          })
-          inCodeBlock = false
-          codeBlockContent = []
-          continue
-        }
-        codeBlockContent.push(line)
+      // 优先级1: 处理需要多行解析的块元素
+      const blockquoteConsumed = this.handleBlockquote(
+        lines[i],
+        i,
+        lines,
+        blocks,
+      )
+      if (blockquoteConsumed > 0) {
+        i += blockquoteConsumed - 1
+        finalizeContext()
         continue
       }
 
-      // 处理标题
-      if (rules.markdown.heading.test(line)) {
-        processParagraph()
-        const [, level, content] = line.match(rules.markdown.heading) || []
-        blocks.push({
-          type: 'heading',
-          depth: level.length,
-          content: this.inlineParser.parseInline(content),
-        })
+      // 优先级2: 处理代码块
+      if (this.handleCodeBlock(lines[i], codeBlockState, blocks)) {
+        finalizeContext()
         continue
       }
 
-      // 处理引用
-      if (rules.markdown.blockquote.test(line)) {
-        processParagraph()
-        const [, content] = line.match(rules.markdown.blockquote) || []
-        blocks.push({
-          type: 'blockquote',
-          content: this.inlineParser.parseInline(content),
-        })
+      // 优先级3: 处理表格
+      const tableConsumed = this.handleTable(lines[i], i, lines, blocks)
+      if (tableConsumed > 0) {
+        i += tableConsumed - 1
+        finalizeContext()
+        continue
+      }
+      // 优先级4: 处理其他单行块元素
+      if (
+        this.handleFootnoteDefinition(lines[i], blocks) ||
+        this.handleHeading(lines[i], blocks) ||
+        this.handleHr(lines[i], blocks) ||
+        this.handleTOC(lines[i], blocks)
+      ) {
+        finalizeContext()
         continue
       }
 
-      // 处理列表
-      if (rules.markdown.list.test(line)) {
-        processParagraph()
-        const [, marker, content] = line.match(rules.markdown.list) || []
-        blocks.push({
-          type: 'listItem',
-          ordered: /^\d+\./.test(marker),
-          content: this.inlineParser.parseInline(content),
-        })
-        continue
-      }
+      // 优先级5: 处理多行块元素
+      const multiLineHandlers = [
+        this.handleList(line, i, lines, blocks),
+        this.handleMathBlock(line, i, lines, blocks),
+        this.handleAdmonition(line, i, lines, blocks),
+        this.handleTimeline(line, i, lines, blocks),
+      ]
 
-      // 处理分割线
-      if (rules.markdown.hr.test(line)) {
-        processParagraph()
-        blocks.push({ type: 'hr' })
-        continue
-      }
-
-      // 处理表格
-      if (rules.markdown.table.test(line)) {
-        processParagraph()
-        const tableLines = lines.slice(i).join('\n')
-        const tableMatch = tableLines.match(rules.markdown.table)
-        if (tableMatch) {
-          const [header, rows] = tableMatch.slice(1)
-          const headers = header.split('|').map((h) => h.trim())
-          const tableRows = rows
-            .split('\n')
-            .map((row) => row.split('|').map((cell) => cell.trim()))
-          blocks.push({
-            type: 'table',
-            headers,
-            rows: tableRows,
-          })
-          i += tableLines.split('\n').length - 1
+      for (const consumed of multiLineHandlers) {
+        if (consumed > 0) {
+          i += consumed - 1
+          finalizeContext()
           continue
         }
       }
 
-      // 处理脚注引用
-      if (rules.markdown.footnote.reference.test(line)) {
-        processParagraph()
-        const [, label] = line.match(rules.markdown.footnote.reference) || []
-        blocks.push({
-          type: 'footnoteReference',
-          label,
-        })
-        continue
-      }
-
-      // 处理脚注定义
-      if (rules.markdown.footnote.definition.test(line)) {
-        processParagraph()
-        const [, label, content] =
-          line.match(rules.markdown.footnote.definition) || []
-        blocks.push({
-          type: 'footnoteDefinition',
-          label,
-          content: this.inlineParser.parseInline(content),
-        })
-        continue
-      }
-
-      // 处理任务列表
-      if (rules.markdown.taskList.test(line)) {
-        processParagraph()
-        const [, marker, content] = line.match(rules.markdown.taskList) || []
-        blocks.push({
-          type: 'taskListItem',
-          checked: marker.trim() === '[x]',
-          content: this.inlineParser.parseInline(content),
-        })
-        continue
-      }
-
-      // 处理段落
+      // 最后处理段落内容
       if (line === '') {
-        processParagraph()
+        finalizeContext()
       } else {
-        currentParagraph.push(line)
+        currentParagraph.push(lines[i]) // 保留原始行内容
       }
     }
 
-    // 处理最后的段落
-    processParagraph()
-
+    finalizeContext()
     return blocks
+  }
+
+  // 辅助方法：创建标准段落节点
+  private createParagraph(lines: string[]): ASTNode {
+    // 合并连续空行处理
+    const cleanedLines = lines
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n') // 合并多个空行
+      .split('\n')
+    return {
+      type: 'paragraph',
+      children: this.inlineParser.parseInline(
+        cleanedLines.join('\n').replace(/(\S)\n(\S)/g, '$1 $2'),
+      ), // 智能空格处理
+    }
+  }
+
+  // 代码块处理逻辑
+  private handleCodeBlock(
+    line: string,
+    state: { active: boolean; lang: string; content: string[] },
+    blocks: ASTNode[],
+  ): boolean {
+    // 处理代码块结束
+    if (state.active) {
+      if (/^```\s*$/.test(line)) {
+        // 修正结束标记检测
+        blocks.push({
+          type: 'codeBlock',
+          lang: state.lang,
+          value: state.content.join('\n'),
+        })
+        state.active = false
+        state.content = []
+      } else {
+        state.content.push(line) // 保留原始缩进和格式
+      }
+      return true // 阻止其他解析
+    }
+
+    // 处理代码块开始
+    const startMatch = line.match(/^```(\w*)\s*$/) // 修正正则表达式
+    if (startMatch) {
+      state.active = true
+      state.lang = startMatch[1] || ''
+      return true
+    }
+
+    return false
+  }
+  // 标题处理逻辑
+  private handleHeading(line: string, blocks: ASTNode[]): boolean {
+    const match = line.match(rules.markdown.heading)
+    if (match) {
+      const [, level, content] = match
+      blocks.push({
+        type: 'heading',
+        depth: level.length,
+        children: this.inlineParser.parseInline(content),
+      })
+      return true
+    }
+    return false
+  }
+
+  // 列表处理逻辑
+  private handleList(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    const taskMatch = line.match(rules.markdown.taskList)
+    if (taskMatch) {
+      const items = []
+      let i = index
+      while (i < lines.length) {
+        const currentLine = lines[i]
+        const taskItem = currentLine.match(rules.markdown.taskList)
+        if (!taskItem) break
+
+        items.push({
+          type: 'taskListItem',
+          checked: taskItem[1] === 'x',
+          children: this.inlineParser.parseInline(taskItem[2]),
+        })
+        i++
+      }
+
+      blocks.push({
+        type: 'list',
+        ordered: false,
+        children: items,
+      })
+      return i - index
+    }
+    const match = line.match(rules.markdown.list)
+    if (!match) return 0
+
+    const isTaskList = /^-\s+\[[ x]\]/.test(line) // 新增任务列表检测
+    const isOrdered = /^\d+\./.test(match[1])
+
+    // 收集连续列表项
+    const listItems = []
+    let i = index
+
+    while (i < lines.length) {
+      const currentLine = lines[i]
+      const itemMatch = currentLine.match(rules.markdown.list)
+      if (!itemMatch) break
+
+      // 提取任务列表状态
+      let checked: boolean | undefined
+      if (isTaskList) {
+        checked = itemMatch[0].includes('[x]')
+      }
+
+      listItems.push({
+        type: 'listItem',
+        checked,
+        children: this.inlineParser.parseInline(itemMatch[2]),
+      })
+      i++
+    }
+
+    // 创建列表节点
+    const listNode: ASTNode = {
+      type: 'list',
+      ordered: isOrdered,
+      children: listItems,
+    }
+
+    blocks.push(listNode)
+    return i - index // 返回消耗行数
+  }
+
+  // 表格处理逻辑
+  private handleTable(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    if (!line.trim().startsWith('|')) return 0
+
+    const tableLines: string[] = []
+    let i = index
+    for (; i < lines.length && i < index + 20; i++) {
+      const currentLine = lines[i].trim()
+      if (currentLine.startsWith('|') || currentLine === '') {
+        tableLines.push(lines[i]) // 保留原始内容
+      } else {
+        break
+      }
+    }
+
+    // 增强表格正则表达式
+    const tableRegExp = /^(\|.*\|)(\n\|\s*:?-+:?\s*\|)+(\n\|.*\|)*$/g
+    const tableMatch = tableLines.join('\n').match(tableRegExp)
+    if (!tableMatch) return 0
+
+    // 分解表格结构
+    const [headerLine, dividerLine, ...bodyLines] = tableLines
+
+    // 解析表头
+    const headers = headerLine
+      .split('|')
+      .slice(1, -1) // 去除首尾空元素
+      .map((cell) => cell.trim().replace(/\\\|/g, '|'))
+
+    // 解析对齐方式
+    const align = dividerLine
+      .split('|')
+      .slice(1, -1)
+      .map((cell) => {
+        const left = /^:-+/.test(cell)
+        const right = /-+:$/.test(cell)
+        return left && right ? 'center' : right ? 'right' : 'left'
+      })
+
+    // 解析表格内容
+    const rowsData = bodyLines
+      .filter((line) => line.trim().startsWith('|'))
+      .map((line) =>
+        line
+          .split('|')
+          .slice(1, -1)
+          .map((cell) => cell.trim().replace(/\\\|/g, '|')),
+      )
+
+    blocks.push({
+      type: 'table',
+      headers,
+      align: align.slice(0, headers.length),
+      rows: rowsData.filter((row) => row.length === headers.length),
+    })
+
+    return tableLines.length
+  }
+
+  private handleHr(line: string, blocks: ASTNode[]): boolean {
+    if (rules.markdown.hr.test(line)) {
+      blocks.push({ type: 'hr' })
+      return true
+    }
+    return false
+  }
+
+  private handleBlockquote(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    if (!line.startsWith('>')) return 0
+
+    const quoteContent: string[] = []
+    let i = index
+
+    // 收集连续引用行
+    while (i < lines.length && lines[i].startsWith('>')) {
+      quoteContent.push(lines[i].replace(/^>+\s*/, ''))
+      i++
+    }
+
+    if (quoteContent.length > 0) {
+      const children = quoteContent.map((content) => ({
+        type: 'paragraph',
+        children: this.inlineParser.parseInline(content.trim()),
+      }))
+
+      blocks.push({
+        type: 'blockquote',
+        children,
+      })
+    }
+
+    return i - index // 返回实际处理的行数
+  }
+
+  private handleMathBlock(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    const mathBlockStart = /^\$\$(\s*\S+)?\s*$/
+    if (!mathBlockStart.test(line)) return 0
+
+    const content = []
+    let i = index + 1
+
+    while (i < lines.length && !/^\$\$$/.test(lines[i])) {
+      content.push(lines[i])
+      i++
+    }
+
+    blocks.push({
+      type: 'mathBlock',
+      value: content.join('\n'),
+      lang: line.match(mathBlockStart)?.[1]?.trim() || '',
+    })
+
+    return i - index // 返回消耗的行数
+  }
+
+  private handleAdmonition(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    const match = line.match(rules.markdown.admonition)
+    if (!match) return 0
+
+    const [, type, title] = match
+    const content = []
+    let i = index + 1
+
+    // 收集直到 ::: 的所有行
+    while (i < lines.length && !/^:::\s*$/.test(lines[i])) {
+      content.push(lines[i])
+      i++
+    }
+
+    // 解析内部内容时重置状态
+    const admonitionBlocks = this.parseBlocks(content)
+
+    blocks.push({
+      type: 'admonition',
+      admonitionType: type,
+      title: title || '',
+      children: admonitionBlocks,
+    })
+
+    return i - index + 1
+  }
+
+  private handleTimeline(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    const match = line.match(rules.markdown.timeline)
+    if (!match) return 0
+
+    // // 关闭前一个段落/列表
+    // this.finalizeContext()
+
+    const [, year, content] = match
+
+    // 如果不存在
+    if (!this.currentTimeline) {
+      this.currentTimeline = {
+        type: 'timeline',
+        children: [],
+      }
+      blocks.push(this.currentTimeline)
+    }
+
+    // 添加时间线项
+    if (this.currentTimeline.children) {
+      this.currentTimeline.children.push({
+        type: 'timelineItem',
+        year,
+        children: this.inlineParser.parseInline(content),
+      })
+    }
+
+    return 1
+  }
+
+  private handleTOC(line: string, blocks: ASTNode[]): boolean {
+    if (rules.markdown.toc.test(line)) {
+      blocks.push({ type: 'toc' })
+      return true
+    }
+    return false
+  }
+  // 新增块级处理方法
+  private handleFootnoteDefinition(line: string, blocks: ASTNode[]): boolean {
+    const match = line.match(rules.markdown.footnoteDefinition)
+    if (match) {
+      const [, label, content] = match
+      blocks.push({
+        type: 'footnoteDefinition',
+        label: label.trim(),
+        children: this.inlineParser.parseInline(content.trim()),
+      })
+      return true
+    }
+    return false
   }
 }
