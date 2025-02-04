@@ -242,67 +242,82 @@ export class ParserBlock {
   }
 
   // 表格处理逻辑
+  // 修改后的表格处理逻辑
   private handleTable(
     line: string,
     index: number,
     lines: string[],
     blocks: ASTNode[],
   ): number {
-    if (!line.trim().startsWith('|')) return 0
+    // 增强表格检测正则（允许空列）
+    const tableRegExp = /^\|([^|\n]*\|)+[\s\S]*?^\|([-:| ]+\|)+/m
 
-    const tableLines: string[] = []
+    // 检测并收集完整表格内容
+    const tableContent: string[] = []
     let i = index
-    for (; i < lines.length && i < index + 20; i++) {
+
+    // 收集连续表格行（最多20行）
+    while (i < lines.length && i < index + 20) {
       const currentLine = lines[i].trim()
+      if (currentLine === '' && tableContent.length === 0) {
+        i++
+        continue // 跳过表格前的空行
+      }
+
       if (currentLine.startsWith('|') || currentLine === '') {
-        tableLines.push(lines[i]) // 保留原始内容
+        tableContent.push(lines[i])
+        // 遇到连续两个空行则终止
+        if (currentLine === '' && tableContent[tableContent.length - 2] === '')
+          break
       } else {
         break
       }
+      i++
     }
 
-    // 增强表格正则表达式
-    const tableRegExp = /^(\|.*\|)(\n\|\s*:?-+:?\s*\|)+(\n\|.*\|)*$/g
-    const tableMatch = tableLines.join('\n').match(tableRegExp)
-    if (!tableMatch) return 0
+    // 清理末尾空行
+    while (
+      tableContent.length > 0 &&
+      tableContent[tableContent.length - 1].trim() === ''
+    ) {
+      tableContent.pop()
+    }
 
-    // 分解表格结构
-    const [headerLine, dividerLine, ...bodyLines] = tableLines
+    // 验证表格结构
+    const tableText = tableContent.join('\n')
+    if (!tableRegExp.test(tableText)) return 0
 
-    // 解析表头
-    const headers = headerLine
-      .split('|')
-      .slice(1, -1) // 去除首尾空元素
-      .map((cell) => cell.trim().replace(/\\\|/g, '|'))
-
-    // 解析对齐方式
-    const align = dividerLine
-      .split('|')
-      .slice(1, -1)
-      .map((cell) => {
-        const left = /^:-+/.test(cell)
-        const right = /-+:$/.test(cell)
-        return left && right ? 'center' : right ? 'right' : 'left'
-      })
-
-    // 解析表格内容
-    const rowsData = bodyLines
-      .filter((line) => line.trim().startsWith('|'))
+    // 分割表格结构
+    const rows = tableContent
+      .filter((line) => line.trim() !== '') // 过滤空行
       .map((line) =>
         line
           .split('|')
-          .slice(1, -1)
+          .slice(1, -1) // 去除首尾空元素
           .map((cell) => cell.trim().replace(/\\\|/g, '|')),
       )
 
-    blocks.push({
-      type: 'table',
-      headers,
-      align: align.slice(0, headers.length),
-      rows: rowsData.filter((row) => row.length === headers.length),
+    // 解析表头和对齐方式
+    const [headerRow, dividerRow, ...dataRows] = rows
+    if (!headerRow || !dividerRow) return 0
+
+    // 解析对齐方式
+    const align = dividerRow.map((cell) => {
+      if (cell === '') return 'left' // 空分隔符默认左对齐
+      const left = /^:-+/.test(cell)
+      const right = /-+:$/.test(cell)
+      return left && right ? 'center' : right ? 'right' : 'left'
     })
 
-    return tableLines.length
+    // 创建AST节点
+    blocks.push({
+      type: 'table',
+      headers: headerRow.map((h) => h || ' '),
+      align: align.slice(0, headerRow.length),
+      rows: dataRows.map((row) => row.map((cell) => cell || ' ')),
+    })
+
+    return tableContent.length // 返回实际处理的行数
   }
 
   private handleHr(line: string, blocks: ASTNode[]): boolean {
@@ -324,7 +339,6 @@ export class ParserBlock {
     const quoteContent: string[] = []
     let i = index
 
-    // 收集连续引用行
     while (i < lines.length && lines[i].startsWith('>')) {
       quoteContent.push(lines[i].replace(/^>+\s*/, ''))
       i++
