@@ -2,16 +2,10 @@ import { rules } from './ruler'
 import { ASTNode } from './types'
 import { ParserInline } from './parser_inline'
 
-interface InlineElement {
-  type: 'bold' | 'italic' | 'link' | 'image' | 'inlineCode'
-  value?: string
-  url?: string
-  alt?: string
-  children?: ASTNode[]
-}
-
 export class ParserBlock {
   private inlineParser: ParserInline
+  private currentList: ASTNode | null = null
+  private currentTimeline: ASTNode | null = null
 
   constructor() {
     this.inlineParser = new ParserInline()
@@ -20,27 +14,43 @@ export class ParserBlock {
   parseBlocks(lines: string[]): ASTNode[] {
     const blocks: ASTNode[] = []
     let currentParagraph: string[] = []
-
-    const processParagraph = () => {
+    // 处理各种块级元素的关闭
+    const finalizeContext = () => {
       if (currentParagraph.length > 0) {
-        blocks.push({
-          type: 'paragraph',
-          children: [
-            {
-              type: 'text',
-              value: currentParagraph.join(' ').trim(),
-            },
-          ],
-        })
+        blocks.push(this.createParagraph(currentParagraph))
         currentParagraph = []
+      }
+
+      if (this.currentList) {
+        blocks.push(this.currentList)
+        this.currentList = null
+      }
+
+      if (this.currentTimeline) {
+        blocks.push(this.currentTimeline)
+        this.currentTimeline = null
       }
     }
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trim()
+      const line = lines[i].trimEnd()
 
+      // 优先级1: 处理需要多行解析的块元素
+      const blockquoteConsumed = this.handleBlockquote(
+        lines[i],
+        i,
+        lines,
+        blocks,
+      )
+      if (blockquoteConsumed > 0) {
+        i += blockquoteConsumed - 1
+        finalizeContext()
+        continue
+      }
+
+      // 优先级2-5: 处理其他块级元素
       if (line.startsWith('```')) {
-        processParagraph()
+        finalizeContext()
         const lang = line.slice(3)
         const codeLines = []
         i++
@@ -61,7 +71,7 @@ export class ParserBlock {
 
       // 处理标题
       if (rules.markdown.heading.test(line)) {
-        processParagraph()
+        finalizeContext()
         const [, level, content] = line.match(rules.markdown.heading) || []
         blocks.push({
           type: 'heading',
@@ -88,7 +98,7 @@ export class ParserBlock {
 
       // 处理引用
       if (rules.markdown.blockquote.test(line)) {
-        processParagraph()
+        finalizeContext()
         const [, content] = line.match(rules.markdown.blockquote) || []
         blocks.push({
           type: 'blockquote',
@@ -99,7 +109,7 @@ export class ParserBlock {
 
       // 处理列表
       if (rules.markdown.list.test(line)) {
-        processParagraph()
+        finalizeContext()
         const [, marker, content] = line.match(rules.markdown.list) || []
         blocks.push({
           type: 'listItem',
@@ -111,14 +121,14 @@ export class ParserBlock {
 
       // 处理分割线
       if (rules.markdown.hr.test(line)) {
-        processParagraph()
+        finalizeContext()
         blocks.push({ type: 'hr' })
         continue
       }
 
       // 处理块级数学公式
       if (rules.markdown.math.test(line)) {
-        processParagraph()
+        finalizeContext()
         const [, content] = line.match(rules.markdown.math) || []
         blocks.push({
           type: 'math',
@@ -129,15 +139,13 @@ export class ParserBlock {
 
       // 处理段落
       if (line === '') {
-        processParagraph()
+        finalizeContext()
       } else {
-        currentParagraph.push(line)
+        currentParagraph.push(lines[i])
       }
     }
 
-    // 处理最后的段落
-    processParagraph()
-
+    finalizeContext()
     return blocks
   }
 
@@ -271,4 +279,72 @@ export class ParserBlock {
 
     return processText(currentText)
   }
+
+  // 新增辅助方法
+  private createParagraph(lines: string[]): ASTNode {
+    const cleanedLines = lines
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .split('\n')
+    return {
+      type: 'paragraph',
+      children: this.inlineParser.parseInline(
+        cleanedLines.join('\n').replace(/(\S)\n(\S)/g, '$1 $2'),
+      ),
+    }
+  }
+
+  private handleBlockquote(
+    line: string,
+    index: number,
+    lines: string[],
+    blocks: ASTNode[],
+  ): number {
+    if (!rules.markdown.blockquote.test(line)) {
+      return 0
+    }
+
+    const quotes: string[] = []
+    let currentIndex = index
+
+    while (
+      currentIndex < lines.length &&
+      rules.markdown.blockquote.test(lines[currentIndex])
+    ) {
+      const [, content] =
+        lines[currentIndex].match(rules.markdown.blockquote) || []
+      quotes.push(content)
+      currentIndex++
+    }
+
+    blocks.push({
+      type: 'blockquote',
+      children: this.inlineParser.parseInline(quotes.join('\n')),
+    })
+
+    return currentIndex - index
+  }
+
+  // 添加新的处理方法
+  // private handleTOC(line: string, blocks: ASTNode[]): boolean {
+  //   if (rules.markdown.toc.test(line)) {
+  //     blocks.push({ type: 'toc' })
+  //     return true
+  //   }
+  //   return false
+  // }
+
+  // private handleFootnoteDefinition(line: string, blocks: ASTNode[]): boolean {
+  //   const match = line.match(rules.markdown.footnoteDefinition)
+  //   if (match) {
+  //     const [, label, content] = match
+  //     blocks.push({
+  //       type: 'footnoteDefinition',
+  //       label: label.trim(),
+  //       children: this.inlineParser.parseInline(content.trim()),
+  //     })
+  //     return true
+  //   }
+  //   return false
+  // }
 }
