@@ -1,4 +1,4 @@
-import MarkdownParser from '@versakit/markdown-parser'
+import { Parser } from '@versakit/markdown-parser'
 const markdownText1 = `
 # This is a header
 
@@ -87,7 +87,7 @@ $$ E = mc^2^ $$
 
 ## 测试完成`
 
-const md = new MarkdownParser.Parser()
+const md = new Parser()
 
 // 解析 markdown
 const ast = md.parseMarkdown(markdownText2)
