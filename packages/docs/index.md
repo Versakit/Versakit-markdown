@@ -6,7 +6,7 @@ hero:
   name: 'Versakit Markdown'
   text: '现代Markdown编辑器'
   image:
-    src: logo.svg
+    src: https://raw.githubusercontent.com/Simonmie/Versakit-markdown/main/logo.svg
     alt: Versakit
   actions:
     - theme: brand

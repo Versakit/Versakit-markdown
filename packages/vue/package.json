@@ -1,6 +1,5 @@
 {
   "name": "@versakit/markdown-vue",
-  "private": true,
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/markdown-vue.js",
@@ -8,6 +7,20 @@
     "build": "vite build",
     "build-type": "run-p type-check \"build-only {@}\" --"
   },
+  "files": [
+    "dist/*"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Simonmie/Versakit-markdown.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
     "sass": "^1.83.4",
     "vite-plugin-svg-icons": "^2.0.1",
@@ -19,5 +32,9 @@
     "typescript": "~5.6.2",
     "vite": "^6.0.5",
     "vue-tsc": "^2.2.0"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/Simonmie/Versakit-markdown/issues"
+  },
+  "homepage": "https://github.com/Simonmie/Versakit-markdown#readme"
 }
