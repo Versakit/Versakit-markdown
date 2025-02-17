@@ -48,6 +48,9 @@ watch(value, () => {
 
       <h2>渲染器</h2>
       <span>{{ preview }}</span>
+
+      <h2>result</h2>
+      <div v-html="preview"></div>
     </div>
   </div>
 </template>
