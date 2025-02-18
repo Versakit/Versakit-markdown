@@ -5,7 +5,7 @@ export const getNav = (): DefaultTheme.NavItem[] => {
     { text: '指南', link: '/guide/installation/' },
     { text: '解释器', link: '/parser/' },
     { text: '渲染器', link: '/renderer/' },
-    { text: '组件', link: '/examples' },
+    { text: '组件', link: '/example' },
     { text: '团队', link: '/team/' },
   ]
 }
