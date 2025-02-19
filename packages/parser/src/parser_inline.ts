@@ -1,116 +1,92 @@
 import { rules } from './ruler'
-import { InlineToken } from './types'
+import type { ASTNode } from './types'
 
 export class ParserInline {
-  parseInline(text: string): InlineToken[] {
-    const tokens: InlineToken[] = []
-    let currentText = text
+  parseInline(text: string): ASTNode[] {
+    const tokens: ASTNode[] = []
+    let remainingText = text
 
-    // 处理图片
-    currentText = currentText.replace(rules.markdown.image, (_, alt, src) => {
-      tokens.push({ type: 'image', alt, src })
-      return ''
-    })
+    while (remainingText) {
+      // 检查所有可能的匹配
+      const matches = [
+        { rule: rules.markdown.image, type: 'image' },
+        { rule: rules.markdown.link, type: 'link' },
+        { rule: rules.markdown.bold, type: 'bold' },
+        { rule: rules.markdown.italic, type: 'italic' },
+        { rule: rules.markdown.inlineCode, type: 'inlineCode' },
+        { rule: rules.markdown.strikethrough, type: 'strikethrough' },
+        { rule: rules.markdown.underline, type: 'underline' },
+        { rule: rules.markdown.subscript, type: 'subscript' },
+        { rule: rules.markdown.superscript, type: 'superscript' },
+        { rule: rules.markdown.audio, type: 'audio' },
+        { rule: rules.markdown.checkboxUnchecked, type: 'checkboxUnchecked' },
+        { rule: rules.markdown.checkboxChecked, type: 'checkboxChecked' },
+        { rule: rules.markdown.highlight, type: 'highlight' },
+        { rule: rules.markdown.table.header, type: 'table' },
+      ]
+        .map(({ rule, type }) => {
+          const match = remainingText.match(rule)
+          return match ? { match, type, index: match.index! } : null
+        })
+        .filter((m): m is NonNullable<typeof m> => m !== null)
 
-    // 处理链接
-    currentText = currentText.replace(rules.markdown.link, (_, text, url) => {
-      tokens.push({ type: 'link', text, url })
-      return ''
-    })
+      // 如果没有匹配，保存剩余文本并退出
+      if (matches.length === 0) {
+        tokens.push({ type: 'text', value: remainingText })
+        break
+      }
 
-    // 处理粗体
-    currentText = currentText.replace(rules.markdown.bold, (_, content) => {
-      tokens.push({ type: 'bold', content })
-      return ''
-    })
+      // 找到最早的匹配
+      matches.sort((a, b) => a.index - b.index)
+      const firstMatch = matches[0]
 
-    // 处理斜体
-    currentText = currentText.replace(rules.markdown.italic, (_, content) => {
-      tokens.push({ type: 'italic', content })
-      return ''
-    })
+      const before = remainingText.slice(0, firstMatch.index)
+      const after = remainingText.slice(
+        firstMatch.index + firstMatch.match[0].length,
+      )
 
-    // 处理行内代码
-    currentText = currentText.replace(
-      rules.markdown.inlineCode,
-      (_, content) => {
-        tokens.push({ type: 'inlineCode', content })
-        return ''
-      },
-    )
+      // 保存前面的普通文本
+      if (before) {
+        tokens.push({ type: 'text', value: before })
+      }
 
-    // 处理删除线
-    currentText = currentText.replace(
-      rules.markdown.strikethrough,
-      (_, content) => {
-        tokens.push({ type: 'strikethrough', content })
-        return ''
-      },
-    )
+      // 根据匹配类型生成节点
+      switch (firstMatch.type) {
+        case 'link':
+          tokens.push({
+            type: 'link',
+            url: firstMatch.match[2],
+            title: firstMatch.match[1],
+            children: [
+              {
+                type: 'text',
+                value: firstMatch.match[1],
+              },
+            ],
+          })
+          break
+        case 'image':
+          tokens.push({
+            type: 'image',
+            url: firstMatch.match[2],
+            alt: firstMatch.match[1],
+          })
+          break
+        case 'audio':
+          tokens.push({
+            type: 'audio',
+            url: firstMatch.match[1],
+          })
+          break
+        default:
+          tokens.push({
+            type: firstMatch.type,
+            value: firstMatch.match[1],
+          })
+      }
 
-    // 处理下划线
-    currentText = currentText.replace(
-      rules.markdown.underline,
-      (_, content) => {
-        tokens.push({ type: 'underline', content })
-        return ''
-      },
-    )
-
-    // 处理下标
-    currentText = currentText.replace(
-      rules.markdown.subscript,
-      (_, content) => {
-        tokens.push({ type: 'subscript', content })
-        return ''
-      },
-    )
-
-    // 处理上标
-    currentText = currentText.replace(
-      rules.markdown.superscript,
-      (_, content) => {
-        tokens.push({ type: 'superscript', content })
-        return ''
-      },
-    )
-
-    // 处理音频
-    currentText = currentText.replace(rules.markdown.audio, (_, src) => {
-      tokens.push({ type: 'audio', src })
-      return ''
-    })
-
-    // 处理未选复选框
-    currentText = currentText.replace(
-      rules.markdown.checkboxUnchecked,
-      (_, content) => {
-        tokens.push({ type: 'checkboxUnchecked', content })
-        return ''
-      },
-    )
-
-    // 处理已选复选框
-    currentText = currentText.replace(
-      rules.markdown.checkboxChecked,
-      (_, content) => {
-        tokens.push({ type: 'checkboxChecked', content })
-        return ''
-      },
-    )
-
-    // 处理高亮
-    currentText = currentText.replace(
-      rules.markdown.highlight,
-      (_, content) => {
-        tokens.push({ type: 'highlight', content })
-        return ''
-      },
-    )
-
-    // 处理剩余的普通文本
-    if (currentText.trim()) {
-      tokens.push({ type: 'text', content: currentText.trim() })
+      // 更新剩余文本
+      remainingText = after
     }
 
     return tokens

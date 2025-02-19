@@ -10,21 +10,29 @@ export const rules: Rules = {
     italic: /\*(.+?)\*/,
 
     // 匹配删除线
-    strikethrough: /~~(.*?)~~/g,
+    strikethrough: /~~(.+?)~~/,
     // 匹配下划线
-    underline: /_(.*?)_/g,
+    underline: /_(.+?)_/,
     // 匹配下标
-    subscript: /~(.*?)~/g,
+    subscript: /~(.+?)~/,
     // 匹配上标
-    superscript: /\^(.*?)\^/g,
-    // 匹配音频
-    audio: /!\[音频\]\((.*?)\)/g,
-    // 匹配未选
-    checkboxUnchecked: /^\s*[-*]\s*\[\s*\]\s*(.*)/g,
-    // 匹配已选
-    checkboxChecked: /^\s*[-*]\s*\[\s*[xX]\s*\]\s*(.*)/g,
+    superscript: /\^(.+?)\^/,
+    // 匹配音频：![音频](url)，url 必须非空
+    audio: /!\[音频\]\((.+?)\)/,
+    // 匹配未选中的复选框
+    checkboxUnchecked: /^\s*[-*]\s*\[\s*\]\s+(.+)$/,
+    // 匹配选中的复选框
+    checkboxChecked: /^\s*[-*]\s*\[\s*[xX]\s*\]\s+(.+)$/,
     // 匹配高亮
-    highlight: /==(.*?)==/g,
+    highlight: /==(.+?)==/,
+    // 匹配数学公式
+    math: /^\$\$([\s\S]+?)\$\$$/,
+    // 添加表格相关规则
+    table: {
+      header: /^\|(.+)\|$/,
+      separator: /^\|(:?-+:?\|)+$/,
+      row: /^\|(.+)\|$/,
+    },
 
     // 匹配链接
     link: /\[(.+?)\]\((.+?)\)/,
@@ -32,13 +40,13 @@ export const rules: Rules = {
     image: /!\[(.+?)\]\((.+?)\)/,
     // 匹配引用
     blockquote: /^>\s+(.+)$/,
-    // 匹配列表项(- 列表项、* 列表项 或 1. 列表项)
+    // 匹配列表项
     list: /^(-|\*|\d+\.)\s+(.+)$/,
-    // 匹配代码块
-    codeBlock: /^```(\w*)\n([\s\S]*?)\n```$/,
+    // 匹配代码块：```语言\n多行内容\n```
+    codeBlock: /^```(\w*)\n([\s\S]+?)\n```$/,
     // 匹配行内代码
     inlineCode: /`(.+?)`/,
-    // 匹配分割线(---、*** 或 ___)
+    // 匹配分割线：--- 或 *** 或 ___
     hr: /^([-*_]){3,}$/,
   },
 }

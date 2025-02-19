@@ -12,6 +12,12 @@ export interface Rules {
     checkboxUnchecked: RegExp
     checkboxChecked: RegExp
     highlight: RegExp
+    math: RegExp
+    table: {
+      header: RegExp
+      separator: RegExp
+      row: RegExp
+    }
 
     link: RegExp
     image: RegExp
@@ -23,20 +29,18 @@ export interface Rules {
   }
 }
 
+// 修改 ASTNode 接口以匹配 renderer 需求
 export interface ASTNode {
   type: string
   children?: ASTNode[]
   depth?: number
-  content?: string | InlineToken[]
-  lang?: string
+  value?: string
   ordered?: boolean
+  url?: string
+  title?: string
+  alt?: string
+  lang?: string
 }
 
-export interface InlineToken {
-  type: string
-  content?: string
-  text?: string
-  url?: string
-  alt?: string
-  src?: string
-}
+// 移除不再需要的接口
+export type Node = ASTNode

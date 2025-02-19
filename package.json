@@ -9,6 +9,8 @@
     "parser:build": "pnpm --filter @versakit/markdown-parser run build",
     "renderer:build": "pnpm --filter @versakit/markdown-renderer run build",
     "docs:dev": "pnpm --filter docs run docs:dev",
+    "docs:build": "pnpm --filter docs run docs:build",
+    "docs:preview": "pnpm --filter docs run docs:preview",
     "lint": "eslint packages",
     "lint:fix": "eslint packages --fix",
     "format": "prettier --write \"./**/*.{html,vue,ts,js,json,md}\"",

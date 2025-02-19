@@ -1,14 +1,25 @@
 <script setup lang="ts">
-import { VerRichEditor } from '@versakit/markdown-vue' // Markdown 编辑器的 Vue 组件
-import MarkdownParser from '@versakit/markdown-parser' // Markdown 解析器
-import MarKdownRenderer from '@versakit/markdown-renderer' // Markdown 渲染器
-import { ref, watch } from 'vue'
+import { VerRichEditor } from '@versakit/markdown-vue'
+import { Parser } from '@versakit/markdown-parser'
+import { RendererText, Renderer } from '@versakit/markdown-renderer'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 
 const value = ref('')
 const ast = ref()
 const preview = ref()
-const parser = new MarkdownParser.Parser()
-const markdownRenderer = new MarKdownRenderer()
+const diffContainer = ref<HTMLDivElement>()
+const parser = new Parser()
+const markdownRenderer = new RendererText()
+let diffRenderer: Renderer
+
+onMounted(() => {
+  if (diffContainer.value) {
+    diffRenderer = new Renderer({
+      container: diffContainer.value,
+      ast: [],
+    })
+  }
+})
 
 // 监听输入的内容变化
 const updateAST = () => {
@@ -21,8 +32,17 @@ const updateAST = () => {
 watch(value, () => {
   updateAST()
   preview.value = markdownRenderer.render(ast.value)
+  // 更新 diff 渲染
+  if (diffRenderer) {
+    diffRenderer.update(ast.value)
+  }
+})
 
-  console.log(preview.value)
+// 组件卸载时清理
+onUnmounted(() => {
+  if (diffRenderer) {
+    diffRenderer.destroy()
+  }
 })
 </script>
 
@@ -45,6 +65,9 @@ watch(value, () => {
       <h2>预览</h2>
 
       <span v-html="preview"></span>
+
+      <h2>diff预览</h2>
+      <div ref="diffContainer"></div>
 
       <h2>渲染器</h2>
       <span>{{ preview }}</span>

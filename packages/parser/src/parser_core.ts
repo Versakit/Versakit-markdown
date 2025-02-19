@@ -8,11 +8,8 @@ export class Parser {
     this.blockParser = new ParserBlock()
   }
 
-  parseMarkdown(text: string): ASTNode {
+  parseMarkdown(text: string): ASTNode[] {
     const lines = text.split('\n')
-    return {
-      type: 'document',
-      children: this.blockParser.parseBlocks(lines),
-    }
+    return this.blockParser.parseBlocks(lines)
   }
 }

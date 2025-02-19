@@ -1,6 +1,6 @@
 {
   "name": "@versakit/markdown-renderer",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "type": "module",
   "main": "./dist/index.esm.js",
@@ -8,11 +8,19 @@
     "build": "rollup -c"
   },
   "files": [
-    "index.js"
+    "dist/*"
   ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Simonmie/Versakit-markdown.git"
+  },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
@@ -21,7 +29,9 @@
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "~5.6.2"
   },
-  "dependencies": {
-    "@versakit/markdown-parser": "file:"
-  }
+  "dependencies": {},
+  "bugs": {
+    "url": "https://github.com/Simonmie/Versakit-markdown/issues"
+  },
+  "homepage": "https://github.com/Simonmie/Versakit-markdown#readme"
 }
