@@ -1,5 +1,9 @@
 import MarkdownParser from '@versakit/markdown-parser'
 const markdownText1 = `
+---
+theme: smartblue
+---
+
 # This is a header
 
 This is a paragraph with **bold text** and *italic text*.
@@ -90,7 +94,7 @@ $$ E = mc^2^ $$
 const md = new MarkdownParser.Parser()
 
 // 解析 markdown
-const ast = md.parseMarkdown(markdownText2)
+const ast = md.parseMarkdown(markdownText1)
 // 格式化输出
 console.log('解析结果：')
 console.log(JSON.stringify(ast, null, 2))
@@ -100,7 +104,7 @@ console.log('\n验证解析结果：')
 console.log('文档类型:', ast.type)
 console.log('子节点数量:', ast.children?.length)
 console.log('第一个标题:', ast.children?.[0])
-console.log(markdownText1)
+console.log(markdownText2)
 const multiLineFormula = `$$ 
     E = mc^2^ 
     E = mc^2^
