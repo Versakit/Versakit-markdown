@@ -1,16 +1,15 @@
 import type { MarkdownNode } from './types'
-
 export const renderNode = (node: MarkdownNode): HTMLElement | Text | void => {
   const { type } = node
 
   switch (type) {
+    case 'theme':
+      return
     case 'root':
       const root = document.createElement('div')
       root.className = 'markdown-content'
       createChildren(root, node.children)
       return root
-    case 'theme':
-      return createTheme(node)
     case 'heading':
       return createHeading(node)
     case 'paragraph':
@@ -36,10 +35,6 @@ export const renderNode = (node: MarkdownNode): HTMLElement | Text | void => {
     default:
       return createText(node)
   }
-}
-// TODO
-function createTheme(node: MarkdownNode): void {
-  console.log('进入主题渲染', node)
 }
 
 function createHeading(node: MarkdownNode): HTMLHeadingElement {
