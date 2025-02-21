@@ -33,7 +33,47 @@ export class ParserBlock {
     }
 
     for (let i = 0; i < lines.length; i++) {
-      const line = lines[i].trimEnd()
+      const line = lines[i].trim()
+
+      // 检查是否为主题语法，且还未解析过
+      if (
+        line === '---' &&
+        !themeParsed &&
+        lines[i + 1]?.startsWith('theme:')
+      ) {
+        i++ // 跳过 '---'
+        const themeLine = lines[i].trim()
+        const match = themeLine.match(/^theme:\s*(\S+)$/)
+        if (match) {
+          blocks.push({
+            type: 'theme',
+            value: match[1], // 解析 theme 的内容
+          })
+          themeParsed = true // 标记为已解析过
+        }
+        i++ // 跳过 '---'
+        continue
+      }
+
+      // 检查是否为主题语法，且还未解析过
+      if (
+        line === '---' &&
+        !themeParsed &&
+        lines[i + 1]?.startsWith('theme:')
+      ) {
+        i++ // 跳过 '---'
+        const themeLine = lines[i].trim()
+        const match = themeLine.match(/^theme:\s*(\S+)$/)
+        if (match) {
+          blocks.push({
+            type: 'theme',
+            value: match[1], // 解析 theme 的内容
+          })
+          themeParsed = true // 标记为已解析过
+        }
+        i++ // 跳过 '---'
+        continue
+      }
 
       // 优先级1: 处理需要多行解析的块元素
       const blockquoteConsumed = this.handleBlockquote(

@@ -1,9 +1,10 @@
 import type { MarkdownNode } from './types'
-
-export const renderNode = (node: MarkdownNode): HTMLElement | Text => {
+export const renderNode = (node: MarkdownNode): HTMLElement | Text | void => {
   const { type } = node
 
   switch (type) {
+    case 'theme':
+      return
     case 'root':
       const root = document.createElement('div')
       root.className = 'markdown-content'

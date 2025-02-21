@@ -43,22 +43,30 @@ const handTable = () => {
         range.deleteContents()
 
         // 创建表格的每一行
+        // const br0 = document.createElement('\n')
+        const br0 = document.createTextNode('\n')
         const row1 = document.createTextNode('| 标题 |  |')
-        const br1 = document.createElement('br')
+        // const br1 = document.createElement('\n')
+        const br1 = document.createTextNode('\n')
         const row2 = document.createTextNode('| --- | --- |')
-        const br2 = document.createElement('br')
+        // const br2 = document.createElement('\n')
+        const br2 = document.createTextNode('\n')
         const row3 = document.createTextNode('|  |  |')
+        // const br3 = document.createElement('\n')
+        const br3 = document.createTextNode('\n')
 
         // 按顺序插入各个元素
+        range.insertNode(br3)
         range.insertNode(row3)
         range.insertNode(br2)
         range.insertNode(row2)
         range.insertNode(br1)
         range.insertNode(row1)
+        range.insertNode(br0)
 
         // 创建新的范围用于设置光标位置
         const newRange = document.createRange()
-        // 设置光标位置到第一个单元格
+        // 设置光标位置到第一个单元格c
         newRange.setStart(row1, 2)
         newRange.setEnd(row1, 4)
 

@@ -4,6 +4,7 @@ import { escapeHtml } from './utils/index'
 export class RendererText {
   render(ast: any): string {
     if (Array.isArray(ast)) {
+      ast.filter((node) => node != null)
       return ast.map((node) => this.renderNode(node)).join('\n')
     }
     return this.renderNode(ast)
@@ -14,6 +15,11 @@ export class RendererText {
 
     switch (node.type) {
       case 'document':
+      // fallthrough
+
+      case 'theme':
+        return ''
+
       case 'paragraph':
         return `<p>${this.renderChildren(node.children)}</p>`
 
