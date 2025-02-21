@@ -118,14 +118,17 @@ export const updateChildren = (
       // 处理节点移动和创建
       const idxInOld = findIdxInOld(newStartNode, oldCh, oldStartIdx, oldEndIdx)
       if (idxInOld === null) {
-        // 新建节点
         const el = renderNode(newStartNode)
-        if (oldStartNode && oldStartNode.el) {
-          parent.insertBefore(el, oldStartNode.el)
-        } else {
-          parent.appendChild(el)
+        //处理type为theme的情况：无返回结点
+        if (el != null) {
+          // 新建节点
+          if (oldStartNode && oldStartNode.el) {
+            parent.insertBefore(el, oldStartNode.el)
+          } else {
+            parent.appendChild(el)
+          }
+          newStartNode.el = el as HTMLElement
         }
-        newStartNode.el = el as HTMLElement
       } else {
         // 移动节点
         const nodeToMove = oldCh[idxInOld]
@@ -143,9 +146,14 @@ export const updateChildren = (
   if (oldStartIdx > oldEndIdx) {
     const fragment = document.createDocumentFragment()
     for (let i = newStartIdx; i <= newEndIdx; i++) {
+      console.log(newCh[i], newCh[i].type)
       const el = renderNode(newCh[i])
-      fragment.appendChild(el)
-      newCh[i].el = el as HTMLElement
+      if (newCh[i].type === 'theme' || el == null) {
+        continue
+      } else {
+        fragment.appendChild(el)
+        newCh[i].el = el as HTMLElement
+      }
     }
     parent.appendChild(fragment)
   } else if (newStartIdx > newEndIdx) {
