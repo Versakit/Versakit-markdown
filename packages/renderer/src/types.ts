@@ -31,7 +31,7 @@ export interface MarkdownNode {
   url?: string
   title?: string
   alt?: string
-  el?: HTMLElement
+  el?: HTMLElement | Text
   lang?: string // 添加代码块语言类型
 }
 

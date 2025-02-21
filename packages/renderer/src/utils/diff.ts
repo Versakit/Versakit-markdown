@@ -180,6 +180,15 @@ export class Diff {
     let i = 0,
       j = 0
 
+    // 处理空文本的特殊情况
+    if (oldText === '') {
+      return newLines.map((line, index) => ({
+        type: 'add',
+        content: line,
+        index,
+      }))
+    }
+
     while (i < oldLines.length || j < newLines.length) {
       if (i >= oldLines.length) {
         changes.push({ type: 'add', content: newLines[j], index: j })
