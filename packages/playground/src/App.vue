@@ -32,6 +32,10 @@ import { RendererText, Renderer } from '@versakit/markdown-renderer'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import cyanosisCss from './css/cyanosis.css?raw'
 import smartBlueCSS from './css/smart-blue.css?raw'
+import channingCyanCSS from './css/channing-cyan.css?raw'
+import condensedNightPurpleCSS from './css/condensed-night-purple.css?raw'
+import fancyCSS from './css/fancy.css?raw'
+import hydrogenCSS from './css/hydrogen.css?raw'
 
 const value = ref('')
 const ast = ref()
@@ -54,6 +58,10 @@ onMounted(() => {
 const mapTheme = new Map([
   ['smartblue', smartBlueCSS],
   ['cyanosis', cyanosisCss],
+  ['channingcyan', channingCyanCSS],
+  ['condensednightpurple', condensedNightPurpleCSS],
+  ['fancy', fancyCSS],
+  ['hydrogen', hydrogenCSS],
 ])
 // 监听输入的内容变化
 const updateAST = () => {
