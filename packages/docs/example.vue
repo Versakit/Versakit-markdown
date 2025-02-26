@@ -3,17 +3,15 @@ import { VerRichEditor } from '@versakit/markdown-vue'
 import { Parser } from '@versakit/markdown-parser'
 import { RendererText, Renderer } from '@versakit/markdown-renderer'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
-import "@versakit/markdown-vue/dist/markdown-vue.css"
+import '@versakit/markdown-vue/dist/markdown-vue.css'
 
 // 创建响应式变量
 const value = ref('')
 const ast = ref()
-const preview = ref()
 const diffContainer = ref<HTMLDivElement>()
 
 // 创建解析器和渲染器实例
 const parser = new Parser()
-const markdownRenderer = new RendererText()
 let diffRenderer: Renderer
 
 onMounted(() => {
@@ -33,7 +31,7 @@ const updateAST = () => {
 // 监听value的变化,更新AST
 watch(value, () => {
   updateAST()
-  preview.value = markdownRenderer.render(ast.value)
+  // preview.value = markdownRenderer.render(ast.value)
   // 更新 diff 渲染
   if (diffRenderer) {
     diffRenderer.update(ast.value)
@@ -50,12 +48,11 @@ onUnmounted(() => {
 
 <template>
   <div class="container-box">
+    <div class="preview">
+      <div ref="diffContainer"></div>
+    </div>
     <div class="rich">
       <VerRichEditor v-model:value="value" />
-    </div>
-
-    <div class="preview">
-      <div v-html="preview"></div>
     </div>
   </div>
 </template>
@@ -72,7 +69,7 @@ onUnmounted(() => {
 }
 
 .rich {
-  min-height: 300px;
+  min-height: 200px;
   width: 100%;
   border: 1px solid #ddd;
   border-radius: 4px;

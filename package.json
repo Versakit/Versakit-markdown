@@ -20,7 +20,9 @@
     "lint:eslint": "eslint packages/**/*.{ts,vue} --cache --fix",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
-    "commitlint": "commitlint --config commitlint.config.cjs -e -V"
+    "commitlint": "commitlint --config commitlint.config.cjs -e -V",
+    "test:e2e": "cypress run",
+    "test:e2e:dev": "cypress open --e2e --browser chrome"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,vue}": [
@@ -51,6 +53,9 @@
     "jsdom": "^26.0.0",
     "lint-staged": "^15.4.0",
     "prettier": "^3.4.2",
-    "vitest": "^3.0.5"
+    "vitest": "^3.0.5",
+    "cypress": "^13.6.0",
+    "typescript": "^4.9.0",
+    "@types/cypress": "^1.1.3"
   }
 }
