@@ -37,15 +37,15 @@ export class Renderer {
 
   // 更新 AST 并触发重新渲染
   update(newAst: MarkdownNode[]) {
-    const newRootAst = {
-      type: 'root',
-      children: newAst,
+    const newRootAst: MarkdownNode = {
+      type: 'root' as const, // 使用 as const 确保类型推断正确
+      children: newAst || [], // 确保 children 始终是数组
     }
 
     if (!this.oldAst) {
       // 首次渲染
       const fragment = document.createDocumentFragment()
-      newRootAst.children.forEach((node) => {
+      ;(newRootAst.children || []).forEach((node) => {
         const el = renderNode(node)
         if (el) {
           node.el = el as HTMLElement

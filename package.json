@@ -11,6 +11,9 @@
     "docs:dev": "pnpm --filter docs run docs:dev",
     "docs:build": "pnpm --filter docs run docs:build",
     "docs:preview": "pnpm --filter docs run docs:preview",
+    "test": "vitest",
+    "test:parser": "vitest packages/parser/**/*.{test,spec}.{js,jsx,ts,tsx}",
+    "test:renderer": "vitest packages/renderer/**/*.{test,spec}.{js,jsx,ts,tsx}",
     "lint": "eslint packages",
     "lint:fix": "eslint packages --fix",
     "format": "prettier --write \"./**/*.{html,vue,ts,js,json,md}\"",
@@ -37,6 +40,7 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@vitejs/plugin-vue": "^5.2.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
@@ -44,7 +48,9 @@
     "eslint-plugin-prettier": "^5.2.2",
     "eslint-plugin-vue": "^9.32.0",
     "husky": "^8.0.0",
+    "jsdom": "^26.0.0",
     "lint-staged": "^15.4.0",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "vitest": "^3.0.5"
   }
 }
