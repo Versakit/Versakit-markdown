@@ -1,34 +1,23 @@
 import resolve from '@rollup/plugin-node-resolve'
-import { terser } from 'rollup-plugin-terser'
 import commonjs from '@rollup/plugin-commonjs'
+import typescript from '@rollup/plugin-typescript'
 import postcss from 'rollup-plugin-postcss'
+import { terser } from 'rollup-plugin-terser'
 
 export default {
-  input: './index.js',
+  input: 'src/index.ts',
   output: [
     {
-      dir: 'dist',
-      format: 'esm',
-      entryFileNames: '[name].esm.js',
+      file: 'dist/index.umd.js',
+      format: 'umd',
+      name: 'versakitMarkdownTheme',
       sourcemap: true,
-      plugins: [terser()],
     },
     {
-      dir: 'dist',
-      format: 'umd',
-      entryFileNames: '[name].umd.js',
-      name: 'VersaMarkdown',
+      file: 'dist/index.esm.js',
+      format: 'esm',
       sourcemap: true,
-      plugins: [terser()],
     },
   ],
-  plugins: [
-    postcss({
-      extract: false,
-      modules: false,
-      inject: false,
-    }),
-    resolve(),
-    commonjs(),
-  ],
+  plugins: [resolve(), commonjs(), typescript(), postcss(), terser()],
 }
