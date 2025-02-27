@@ -50,6 +50,7 @@ jobs:
           pnpm --filter @versakit/markdown-vue run build
           pnpm --filter @versakit/markdown-parser run build
           pnpm --filter @versakit/markdown-renderer run build
+          pnpm --filter @versakit/markdown-theme run build
       - name: Build with VitePress
         run: pnpm docs:build # 或 pnpm docs:build / yarn docs:build / bun run docs:build
       - name: Upload artifact
