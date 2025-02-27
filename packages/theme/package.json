@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c"
+    "build": "rollup -c rollup.config.mjs"
   },
   "keywords": [],
   "author": "",
