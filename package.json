@@ -8,6 +8,7 @@
     "vue:build": "pnpm --filter @versakit/markdown-vue run build",
     "parser:build": "pnpm --filter @versakit/markdown-parser run build",
     "renderer:build": "pnpm --filter @versakit/markdown-renderer run build",
+    "theme:build": "pnpm --filter @versakit/markdown-theme run build",
     "docs:dev": "pnpm --filter docs run docs:dev",
     "docs:build": "pnpm --filter docs run docs:build",
     "docs:preview": "pnpm --filter docs run docs:preview",

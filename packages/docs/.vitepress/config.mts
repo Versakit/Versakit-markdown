@@ -14,6 +14,7 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Simonmie/Versakit-markdown' },
     ],
+    outline: false,
   },
   vite: {
     server: {

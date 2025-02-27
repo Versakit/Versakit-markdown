@@ -1,8 +1,5 @@
-# 编辑器输入组件
 
-## 这是一个带有 Markdown 编辑器输入组件的示例
-
-<example />
+<example style="width: 180%;margin-left: -20%;"/>
 
 <script setup>
 import example from './example.vue'
