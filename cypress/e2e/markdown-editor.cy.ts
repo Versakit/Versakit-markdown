@@ -1,7 +1,7 @@
 describe('Markdown Editor E2E Tests', () => {
   beforeEach(() => {
     // 访问编辑器页面
-    cy.visit('/example')
+    cy.visit('Versakit-markdown/example.html')
   })
 
   it('should render the editor and preview containers', () => {
