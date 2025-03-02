@@ -80,6 +80,9 @@ importers:
       '@versakit/markdown-vue':
         specifier: workspace:*
         version: link:../vue
+      juejin-markdown-themes:
+        specifier: ^1.34.0
+        version: 1.34.0
       vitepress-plugin-group-icons:
         specifier: ^1.3.5
         version: 1.3.5
@@ -3014,6 +3017,9 @@ packages:
   jsprim@2.0.2:
     resolution: {integrity: sha512-gqXddjPqQ6G40VdnI6T6yObEC+pDNvyP95wdQhkWkg7crHH3km5qP1FsOXEkzEQwnz6gz5qGTn1c2Y52wP3OyQ==}
     engines: {'0': node >=0.6.0}
+
+  juejin-markdown-themes@1.34.0:
+    resolution: {integrity: sha512-oislBW4mmMLfLFNLO+ywtcRd9eWBs8A9wE9w4ENqAkbRquSJKaBQX+4m6r3P+gLft4bvAMUhD+6ASRf2AWPL8A==}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -7803,6 +7809,8 @@ snapshots:
       extsprintf: 1.3.0
       json-schema: 0.4.0
       verror: 1.10.0
+
+  juejin-markdown-themes@1.34.0: {}
 
   keyv@4.5.4:
     dependencies:

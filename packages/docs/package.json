@@ -15,10 +15,11 @@
     "vitepress": "^1.5.0"
   },
   "dependencies": {
-    "@versakit/markdown-vue": "workspace:*",
     "@versakit/markdown-parser": "workspace:*",
     "@versakit/markdown-renderer": "workspace:*",
     "@versakit/markdown-theme": "workspace:*",
+    "@versakit/markdown-vue": "workspace:*",
+    "juejin-markdown-themes": "^1.34.0",
     "vitepress-plugin-group-icons": "^1.3.5"
   }
 }
