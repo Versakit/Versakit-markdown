@@ -40,6 +40,8 @@ export interface ASTNode {
   title?: string
   alt?: string
   lang?: string
+  alignments?: ('left' | 'center' | 'right')[]
+  isHeader?: boolean
 }
 
 // 移除不再需要的接口

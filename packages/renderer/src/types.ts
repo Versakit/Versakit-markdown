@@ -24,6 +24,9 @@ export interface MarkdownNode {
     | 'math'
     | 'hr'
     | 'audio'
+    | 'table' // 添加表格相关类型
+    | 'tableRow'
+    | 'tableCell'
   children?: MarkdownNode[]
   depth?: number
   value?: string
@@ -33,6 +36,9 @@ export interface MarkdownNode {
   alt?: string
   el?: HTMLElement | Text
   lang?: string // 添加代码块语言类型
+  headers?: string[] // 添加表格headers
+  alignments?: ('left' | 'center' | 'right')[] // 添加对齐方式
+  isHeader?: boolean // 表格单元格是否是表头
 }
 
 export interface RendererOptions {

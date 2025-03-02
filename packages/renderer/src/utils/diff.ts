@@ -17,6 +17,15 @@ const sameNode = (
       return oldNode.value === newNode.value
     case 'code':
       return oldNode.value === newNode.value && oldNode.lang === newNode.lang
+    case 'table':
+      return (
+        oldNode.children?.length === newNode.children?.length &&
+        oldNode.alignments?.toString() === newNode.alignments?.toString()
+      )
+    case 'tableRow':
+      return oldNode.children?.length === newNode.children?.length
+    case 'tableCell':
+      return oldNode.isHeader === newNode.isHeader
     default:
       return true
   }
@@ -63,6 +72,15 @@ const updateAttrs = (oldNode: MarkdownNode, newNode: MarkdownNode): void => {
     const imgEl = oldNode.el as HTMLImageElement
     imgEl.src = newNode.url || ''
     imgEl.alt = newNode.alt || ''
+  }
+
+  if (oldNode.type === 'tableCell') {
+    const cellEl = oldNode.el as HTMLTableCellElement
+    if (newNode.isHeader !== oldNode.isHeader) {
+      const newEl = document.createElement(newNode.isHeader ? 'th' : 'td')
+      oldNode.el.parentNode?.replaceChild(newEl, oldNode.el)
+      oldNode.el = newEl
+    }
   }
 }
 

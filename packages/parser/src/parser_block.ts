@@ -89,9 +89,9 @@ export class ParserBlock {
       // 添加表格解析
       if (rules.markdown.table.header.test(line)) {
         const tableData = this.parseTable(lines, i)
-        if (tableData) {
+        if (tableData && tableData.children) {
           blocks.push(tableData)
-          i += tableData.rows.length + 1 // 跳过已处理的行
+          i += tableData.children.length - 1 + 1 // 减1是去掉表头行，加1是分隔符行
           continue
         }
       }
@@ -150,7 +150,7 @@ export class ParserBlock {
   }
 
   // 添加表格解析方法
-  parseTable(lines: string[], startIndex: number) {
+  parseTable(lines: string[], startIndex: number): ASTNode | null {
     // 检查参数有效性
     if (!lines || !lines[startIndex]) return null
 
@@ -199,16 +199,37 @@ export class ParserBlock {
         .map((cell) => cell.trim())
 
       if (cells.length === headers.length) {
-        rows.push(cells.map((cell) => this.parseInline(cell)))
+        rows.push(cells)
       }
       currentIndex++
     }
 
+    // 转换表头为节点结构
+    const headerCells = headers.map((header) => ({
+      type: 'tableCell' as const,
+      isHeader: true,
+      children: this.inlineParser.parseInline(header),
+    }))
+
+    const headerRow = {
+      type: 'tableRow' as const,
+      children: headerCells,
+    }
+
+    // 转换数据行为节点结构
+    const bodyRows = rows.map((row) => ({
+      type: 'tableRow' as const,
+      children: row.map((cell) => ({
+        type: 'tableCell' as const,
+        isHeader: false,
+        children: this.inlineParser.parseInline(cell),
+      })),
+    }))
+
     return {
       type: 'table',
-      headers: headers.map((header) => this.parseInline(header)),
       alignments,
-      rows,
+      children: [headerRow, ...bodyRows],
     }
   }
 

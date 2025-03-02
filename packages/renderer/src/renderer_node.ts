@@ -51,6 +51,12 @@ export const renderNode = (node: MarkdownNode): HTMLElement | Text => {
       return createHorizontalRule()
     case 'audio':
       return createAudio(node)
+    case 'table':
+      return createTable(node)
+    case 'tableRow':
+      return createTableRow(node)
+    case 'tableCell':
+      return createTableCell(node)
     default:
       return createText(node)
   }
@@ -201,6 +207,65 @@ function createAudio(node: MarkdownNode): HTMLElement {
     el.title = node.alt
   }
   return el
+}
+
+// 添加表格创建函数
+function createTable(node: MarkdownNode): HTMLTableElement {
+  const table = document.createElement('table')
+  table.className = 'markdown-table'
+
+  // 创建表头
+  if (node.children && node.children.length > 0) {
+    const thead = document.createElement('thead')
+    const headerRow = document.createElement('tr')
+
+    node.children[0].children?.forEach((cell, index) => {
+      const th = document.createElement('th')
+      if (node.alignments && node.alignments[index]) {
+        th.style.textAlign = node.alignments[index]
+      }
+      createChildren(th, cell.children)
+      headerRow.appendChild(th)
+    })
+
+    thead.appendChild(headerRow)
+    table.appendChild(thead)
+
+    // 创建表体
+    if (node.children.length > 1) {
+      const tbody = document.createElement('tbody')
+      for (let i = 1; i < node.children.length; i++) {
+        const row = node.children[i]
+        const tr = document.createElement('tr')
+
+        row.children?.forEach((cell, index) => {
+          const td = document.createElement('td')
+          if (node.alignments && node.alignments[index]) {
+            td.style.textAlign = node.alignments[index]
+          }
+          createChildren(td, cell.children)
+          tr.appendChild(td)
+        })
+
+        tbody.appendChild(tr)
+      }
+      table.appendChild(tbody)
+    }
+  }
+
+  return table
+}
+
+function createTableRow(node: MarkdownNode): HTMLTableRowElement {
+  const tr = document.createElement('tr')
+  createChildren(tr, node.children)
+  return tr
+}
+
+function createTableCell(node: MarkdownNode): HTMLTableCellElement {
+  const cell = document.createElement(node.isHeader ? 'th' : 'td')
+  createChildren(cell, node.children)
+  return cell
 }
 
 function createChildren(
