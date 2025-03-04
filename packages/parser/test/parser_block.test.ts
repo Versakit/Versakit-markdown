@@ -70,16 +70,38 @@ describe('ParserBlock', () => {
       expect(result).toEqual([
         {
           type: 'table',
-          headers: [
-            [{ type: 'text', value: 'Header 1' }],
-            [{ type: 'text', value: 'Header 2' }],
-          ],
           alignments: ['left', 'left'],
-          rows: [
-            [
-              [{ type: 'text', value: 'Cell 1' }],
-              [{ type: 'text', value: 'Cell 2' }],
-            ],
+          children: [
+            {
+              type: 'tableRow',
+              children: [
+                {
+                  type: 'tableCell',
+                  isHeader: true,
+                  children: [{ type: 'text', value: 'Header 1' }],
+                },
+                {
+                  type: 'tableCell',
+                  isHeader: true,
+                  children: [{ type: 'text', value: 'Header 2' }],
+                },
+              ],
+            },
+            {
+              type: 'tableRow',
+              children: [
+                {
+                  type: 'tableCell',
+                  isHeader: false,
+                  children: [{ type: 'text', value: 'Cell 1' }],
+                },
+                {
+                  type: 'tableCell',
+                  isHeader: false,
+                  children: [{ type: 'text', value: 'Cell 2' }],
+                },
+              ],
+            },
           ],
         },
       ])
@@ -96,18 +118,48 @@ describe('ParserBlock', () => {
       const result = parser.parseTable(input, 0)
       expect(result).toEqual({
         type: 'table',
-        headers: [
-          [{ type: 'text', value: 'Left' }],
-          [{ type: 'text', value: 'Center' }],
-          [{ type: 'text', value: 'Right' }],
-        ],
         alignments: ['left', 'center', 'right'],
-        rows: [
-          [
-            [{ type: 'text', value: '1' }],
-            [{ type: 'text', value: '2' }],
-            [{ type: 'text', value: '3' }],
-          ],
+        children: [
+          {
+            type: 'tableRow',
+            children: [
+              {
+                type: 'tableCell',
+                isHeader: true,
+                children: [{ type: 'text', value: 'Left' }],
+              },
+              {
+                type: 'tableCell',
+                isHeader: true,
+                children: [{ type: 'text', value: 'Center' }],
+              },
+              {
+                type: 'tableCell',
+                isHeader: true,
+                children: [{ type: 'text', value: 'Right' }],
+              },
+            ],
+          },
+          {
+            type: 'tableRow',
+            children: [
+              {
+                type: 'tableCell',
+                isHeader: false,
+                children: [{ type: 'text', value: '1' }],
+              },
+              {
+                type: 'tableCell',
+                isHeader: false,
+                children: [{ type: 'text', value: '2' }],
+              },
+              {
+                type: 'tableCell',
+                isHeader: false,
+                children: [{ type: 'text', value: '3' }],
+              },
+            ],
+          },
         ],
       })
     })
