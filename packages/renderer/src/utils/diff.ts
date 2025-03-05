@@ -17,6 +17,15 @@ const sameNode = (
       return oldNode.value === newNode.value
     case 'code':
       return oldNode.value === newNode.value && oldNode.lang === newNode.lang
+    case 'table':
+      return (
+        oldNode.children?.length === newNode.children?.length &&
+        oldNode.alignments?.toString() === newNode.alignments?.toString()
+      )
+    case 'tableRow':
+      return oldNode.children?.length === newNode.children?.length
+    case 'tableCell':
+      return oldNode.isHeader === newNode.isHeader
     default:
       return true
   }
@@ -64,29 +73,45 @@ const updateAttrs = (oldNode: MarkdownNode, newNode: MarkdownNode): void => {
     imgEl.src = newNode.url || ''
     imgEl.alt = newNode.alt || ''
   }
+
+  if (oldNode.type === 'tableCell') {
+    const cellEl = oldNode.el as HTMLTableCellElement
+    if (newNode.isHeader !== oldNode.isHeader) {
+      const newEl = document.createElement(newNode.isHeader ? 'th' : 'td')
+      oldNode.el.parentNode?.replaceChild(newEl, oldNode.el)
+      oldNode.el = newEl
+    }
+  }
 }
 
 const patchVnode = (oldNode: MarkdownNode, newNode: MarkdownNode): void => {
   if (oldNode === newNode) return
 
-  newNode.el = oldNode.el
-
+  // 处理文本节点的特殊情况
   if (oldNode.type === 'text' && newNode.type === 'text') {
-    if (oldNode.value !== newNode.value && oldNode.el instanceof Text) {
-      oldNode.el.nodeValue = newNode.value || ''
+    if (oldNode.value !== newNode.value) {
+      const oldEl = oldNode.el as unknown as Text
+      if (oldEl && oldEl.nodeType === Node.TEXT_NODE) {
+        oldEl.nodeValue = newNode.value || ''
+      }
     }
+    newNode.el = oldNode.el
     return
   }
+
+  newNode.el = oldNode.el
 
   updateAttrs(oldNode, newNode)
 
   if (oldNode.children || newNode.children) {
-    updateChildren(oldNode.el, oldNode.children || [], newNode.children || [])
+    if (oldNode.el instanceof HTMLElement) {
+      updateChildren(oldNode.el, oldNode.children || [], newNode.children || [])
+    }
   }
 }
 
 export const updateChildren = (
-  parent: HTMLElement | undefined,
+  parent: HTMLElement,
   oldCh: (MarkdownNode | undefined)[],
   newCh: MarkdownNode[],
 ): void => {
@@ -144,8 +169,14 @@ export const updateChildren = (
     const fragment = document.createDocumentFragment()
     for (let i = newStartIdx; i <= newEndIdx; i++) {
       const el = renderNode(newCh[i])
-      fragment.appendChild(el)
-      newCh[i].el = el as HTMLElement
+      if (el) {
+        fragment.appendChild(el)
+        if (el instanceof Text) {
+          newCh[i].el = el as unknown as HTMLElement
+        } else {
+          newCh[i].el = el as HTMLElement
+        }
+      }
     }
     parent.appendChild(fragment)
   } else if (newStartIdx > newEndIdx) {
@@ -166,6 +197,15 @@ export class Diff {
     const changes: Change[] = []
     let i = 0,
       j = 0
+
+    // 处理空文本的特殊情况
+    if (oldText === '') {
+      return newLines.map((line, index) => ({
+        type: 'add',
+        content: line,
+        index,
+      }))
+    }
 
     while (i < oldLines.length || j < newLines.length) {
       if (i >= oldLines.length) {

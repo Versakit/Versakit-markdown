@@ -8,16 +8,22 @@
     "vue:build": "pnpm --filter @versakit/markdown-vue run build",
     "parser:build": "pnpm --filter @versakit/markdown-parser run build",
     "renderer:build": "pnpm --filter @versakit/markdown-renderer run build",
+    "theme:build": "pnpm --filter @versakit/markdown-theme run build",
     "docs:dev": "pnpm --filter docs run docs:dev",
     "docs:build": "pnpm --filter docs run docs:build",
     "docs:preview": "pnpm --filter docs run docs:preview",
+    "test": "vitest",
+    "test:parser": "vitest packages/parser/**/*.{test,spec}.{js,jsx,ts,tsx}",
+    "test:renderer": "vitest packages/renderer/**/*.{test,spec}.{js,jsx,ts,tsx}",
     "lint": "eslint packages",
     "lint:fix": "eslint packages --fix",
     "format": "prettier --write \"./**/*.{html,vue,ts,js,json,md}\"",
     "lint:eslint": "eslint packages/**/*.{ts,vue} --cache --fix",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
-    "commitlint": "commitlint --config commitlint.config.cjs -e -V"
+    "commitlint": "commitlint --config commitlint.config.cjs -e -V",
+    "test:e2e": "cypress run",
+    "test:e2e:dev": "cypress open --e2e --browser chrome"
   },
   "lint-staged": {
     "**/*.{js,jsx,ts,tsx,vue}": [
@@ -37,6 +43,7 @@
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
+    "@vitejs/plugin-vue": "^5.2.1",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.31.0",
@@ -44,7 +51,12 @@
     "eslint-plugin-prettier": "^5.2.2",
     "eslint-plugin-vue": "^9.32.0",
     "husky": "^8.0.0",
+    "jsdom": "^26.0.0",
     "lint-staged": "^15.4.0",
-    "prettier": "^3.4.2"
+    "prettier": "^3.4.2",
+    "vitest": "^3.0.5",
+    "cypress": "^13.6.0",
+    "typescript": "^4.9.0",
+    "@types/cypress": "^1.1.3"
   }
 }
