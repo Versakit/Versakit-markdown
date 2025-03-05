@@ -4,15 +4,15 @@ function handleEnterInput(editor: HTMLElement): void {
   // 监听 keydown 事件
   editor.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
-      event.preventDefault() // 阻止默认回车行为
-      handleEnter(event.target as HTMLElement)
+      handleEnter(event)
     }
   })
 }
 
-function handleEnter(element: HTMLElement): void {
+function handleEnter(event: KeyboardEvent): void {
   const selection = window.getSelection()
   if (selection) {
+    event.preventDefault()
     const range = selection.getRangeAt(0)
     const textNode = range.startContainer
     const offset = range.startOffset
