@@ -12,8 +12,9 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import store from '../../../store/store.ts'
 import type { RichProps } from '../../type.ts'
 import {UndoRedoManager} from '../../../utils/undoRedoManager.ts' // 确保路径正确
-import enterINput from '../../../utils/enterInput.ts' // 确保路径正确
+import enterInput from '../../../utils/enterInput.ts' // 确保路径正确
 import saveLong from '../../../utils/saveLong.ts' // 确保路径正确
+
 
 const editorRef = ref<HTMLElement | null>(null)
 const currentRow = ref(1)
@@ -56,7 +57,8 @@ const updateCursorPosition = () => {
 }
 
 // 定义更新函数，处理状态更新时的逻辑
-const customUpdateFunction = () => {
+const customUpdateFunction = (e) => {
+  
   const textContent = editorRef.value?.textContent || ''
   console.log(editorRef.value.innerText)
 
@@ -75,14 +77,13 @@ onMounted(() => {
   
   if (editorRef.value) {
     saveLong(editorRef.value)
+    enterInput(editorRef.value)
     store.actions({ editorRef: editorRef.value })
 
     // 初始化 UndoRedoManager
     undoRedoManager.value = new UndoRedoManager(editorRef.value)
     window.undoRedoManager = undoRedoManager.value
     document.addEventListener('selectionchange', updateCursorPosition)
-
-    
 
     editorRef.value.addEventListener('input', customUpdateFunction)
 
