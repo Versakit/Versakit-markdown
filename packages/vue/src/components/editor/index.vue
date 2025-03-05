@@ -11,7 +11,7 @@
 import { onMounted, onUnmounted, ref } from 'vue'
 import store from '../../../store/store.ts'
 import type { RichProps } from '../../type.ts'
-import UndoRedoManager from '../../../utils/undoRedoManager.ts' // 确保路径正确
+import {UndoRedoManager} from '../../../utils/undoRedoManager.ts' // 确保路径正确
 
 const editorRef = ref<HTMLElement | null>(null)
 const currentRow = ref(1)
@@ -75,19 +75,24 @@ onMounted(() => {
 
     // 初始化 UndoRedoManager
     undoRedoManager.value = new UndoRedoManager(editorRef.value)
-
+    window.undoRedoManager = undoRedoManager.value
     document.addEventListener('selectionchange', updateCursorPosition)
     editorRef.value.addEventListener('input', customUpdateFunction)
 
     // 监听键盘事件
     document.addEventListener('keydown', (event) => {
-      if (event.ctrlKey) {
+      if (event.ctrlKey || event.metaKey) {
         if (event.key === 'z') {
           event.preventDefault() // 阻止默认行为
-          undoRedoManager.value?.undo()
-        } else if (event.key === 'y') {
-          event.preventDefault() // 阻止默认行为
-          undoRedoManager.value?.redo()
+          if (event.shiftKey) {
+            undoRedoManager.value?.redo() // Ctrl+Shift+Z 执行重做
+          } else {
+            undoRedoManager.value?.undo() // Ctrl+Z 执行撤销
+          }
+        } else {
+          if (event.key === 'y') {
+            undoRedoManager.value?.redo() // Ctrl+Y 执行重做
+          }
         }
       }
     })
