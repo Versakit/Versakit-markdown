@@ -12,6 +12,8 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import store from '../../../store/store.ts'
 import type { RichProps } from '../../type.ts'
 import {UndoRedoManager} from '../../../utils/undoRedoManager.ts' // 确保路径正确
+import enterINput from '../../../utils/enterInput.ts' // 确保路径正确
+import saveLong from '../../../utils/saveLong.ts' // 确保路径正确
 
 const editorRef = ref<HTMLElement | null>(null)
 const currentRow = ref(1)
@@ -70,13 +72,18 @@ const undoRedoManager = ref<UndoRedoManager | null>(null)
 
 // 生命周期钩子
 onMounted(() => {
+  
   if (editorRef.value) {
+    saveLong(editorRef.value)
     store.actions({ editorRef: editorRef.value })
 
     // 初始化 UndoRedoManager
     undoRedoManager.value = new UndoRedoManager(editorRef.value)
     window.undoRedoManager = undoRedoManager.value
     document.addEventListener('selectionchange', updateCursorPosition)
+
+    
+
     editorRef.value.addEventListener('input', customUpdateFunction)
 
     // 监听键盘事件
